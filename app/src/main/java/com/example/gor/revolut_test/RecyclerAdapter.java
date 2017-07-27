@@ -6,7 +6,6 @@ import android.view.ViewGroup;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by Gor on 24.07.2017.
@@ -14,26 +13,29 @@ import java.util.List;
 
 class RecyclerAdapter extends RecyclerView.Adapter<SimpleViewHolder>{
 
+    public static ArrayList<String> FX_URL = CurrencyList.FX_URL;
+
     private final WeakReference<LayoutInflater> localInflater;
-    private List<CurrencyClass> mCurrency;
+    private CurrencyList mCurList;
+    private ViewGroup mParent;
 
     public RecyclerAdapter(LayoutInflater layoutInflater){
         //----------------
-        mCurrency = new ArrayList<>();
-        mCurrency.add(new CurrencyClass("GBR", 0.1845));
-        mCurrency.add(new CurrencyClass("EUR", 1.3045));
-        mCurrency.add(new CurrencyClass("USD", 1.1956));
+        FX_URL.add("http://api.fixer.io/latest?base=GBP");
+        FX_URL.add("http://api.fixer.io/latest?base=EUR");
+        FX_URL.add("http://api.fixer.io/latest?base=USD");
         //------------------
 
         localInflater = new WeakReference<LayoutInflater>(layoutInflater);
-
-
+        mCurList = CurrencyList.getInstance();
     }
 
     @Override
     public SimpleViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater inflater = localInflater.get();
         if(inflater != null){
+            mParent = parent;
+            //В синглтон нужно вставить родителя--- тут----
             return new SimpleViewHolder(inflater.inflate(R.layout.recycler_view, parent, false));
         }
         else {
@@ -43,8 +45,15 @@ class RecyclerAdapter extends RecyclerView.Adapter<SimpleViewHolder>{
 
     @Override
     public void onBindViewHolder(SimpleViewHolder holder, int position) {
-        holder.setCurrancyName(mCurrency.get(position).currencyName);
-        holder.setCurrancyRate(mCurrency.get(position).currencyRate);
+        String ownCurrencyName = mCurList.getCurrencyName(position);
+
+        //--Для информированности другой вью, какая мы сейчас валюта.
+        //---может можно было использовать интерфейс для этой цели---
+        mCurList.setCurrentlyExchange(mParent, ownCurrencyName );
+
+        holder.setCurrancyName(ownCurrencyName);
+        String currencyTo = mCurList.getCurrencyFrom(mParent);
+        holder.setCurrancyRate(mCurList.getRate(currencyTo));
     }
 
     @Override

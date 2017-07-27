@@ -17,13 +17,13 @@
     </Toolbar>
 
     <android.support.v7.widget.RecyclerView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/id_recycler_top"
         android:layout_below="@id/id_toolbar_fx"/>
 
     <android.support.v7.widget.RecyclerView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/id_recycler_bottom"
         android:layout_below="@id/id_recycler_top"/>
