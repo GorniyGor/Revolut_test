@@ -44,10 +44,8 @@ public class MainActivity extends AppCompatActivity {
         //---------------------------------------------------
 
 
-        //---initialData----
-
         //----RecyclerAdapter----
-        mRecyclerAdapter = new RecyclerAdapter(getLayoutInflater());
+        mRecyclerAdapter = new RecyclerAdapter(getLayoutInflater(), service);
         //---First recycler------
         mRecyclerViewTop = (RecyclerView)findViewById(R.id.id_recycler_top);
         mRecyclerViewTop.setAdapter(mRecyclerAdapter);
@@ -68,6 +66,27 @@ public class MainActivity extends AppCompatActivity {
         SnapHelper mSnapHelperBottom = new PagerSnapHelper();
         mSnapHelperBottom.attachToRecyclerView(mRecyclerViewBottom);
 
+        //---initialData----
 
+        //---Нам нужено обновление данных, когда какой-то из ресайклеров поменялся
+        LoadService.NotifyListener mNotifyListener = new LoadService.NotifyListener() {
+            @Override
+            public void onNotify() {
+                mRecyclerViewTop.getAdapter().notifyDataSetChanged();
+                mRecyclerViewBottom.getAdapter().notifyDataSetChanged();
+            }
+        };
+
+        if (service != null) {
+            service.setNotifyListener(mNotifyListener);
+        }
+
+
+    }
+
+    @Override
+    protected void onStop() {
+        unbindService(serviceConnection);
+        super.onStop();
     }
 }

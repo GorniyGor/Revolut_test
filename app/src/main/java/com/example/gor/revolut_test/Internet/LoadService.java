@@ -13,13 +13,16 @@ import android.support.annotation.Nullable;
 public class LoadService extends Service{
 
     private final IBinder mBinder = new MyBinder();
+    private NotifyListener mNotifyListener;
+
     private DataLoader mDataSource;
     private DataLoader.DataHasBeenLoadedListener mLoadedListener =
             new DataLoader.DataHasBeenLoadedListener() {
                 @Override
                 public void onDataLoaded(String currencyFrom, String jsonContent) {
                     JSONHandler.dataFilling(currencyFrom, jsonContent);
-                    //Но
+
+                    mNotifyListener.onNotify();
                 }
             };
 
@@ -27,12 +30,21 @@ public class LoadService extends Service{
     @Override
     public IBinder onBind(Intent intent) {
         mDataSource = new DataLoader(mLoadedListener);
+        mDataSource.toLoadData();
         return mBinder;
+    }
+
+    public void setNotifyListener(NotifyListener mNotifyListener) {
+        this.mNotifyListener = mNotifyListener;
     }
 
     public class MyBinder extends Binder {
         public LoadService getService() {
             return LoadService.this;
         }
+    }
+
+    public interface NotifyListener{
+        void onNotify();
     }
 }

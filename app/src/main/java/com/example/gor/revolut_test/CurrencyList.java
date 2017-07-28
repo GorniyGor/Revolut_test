@@ -18,7 +18,7 @@ public class CurrencyList {
 
     private static final String TAG = "myLogs" ;
 
-    public static ArrayList<String> FX_URL = new ArrayList<>();
+    public static HashMap<String, String> FX_URL = new HashMap<>();
 
     public static volatile CurrencyList sSelf;
     private HashMap<ViewGroup, String> currentlyExchange = new HashMap<>();
