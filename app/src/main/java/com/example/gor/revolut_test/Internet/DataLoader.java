@@ -1,5 +1,7 @@
 package com.example.gor.revolut_test.Internet;
 
+import android.util.Log;
+
 import com.example.gor.revolut_test.CurrencyList;
 
 import java.util.HashMap;
@@ -23,6 +25,9 @@ public class DataLoader {
 
     private void start() {
         executor = Executors.newFixedThreadPool(1);
+        FX_URL.put("GBP", "http://api.fixer.io/latest?base=GBP");
+        FX_URL.put("EUR", "http://api.fixer.io/latest?base=EUR");
+        FX_URL.put("USD", "http://api.fixer.io/latest?base=USD");
     }
 
     public void toLoadData(){
@@ -31,7 +36,6 @@ public class DataLoader {
             executor.submit(new Runnable() {
                 @Override
                 public void run() {
-                    //Мутное место с position, надо скачивать сразу всё, а не при новой позиции по одной
                     HttpRequest request = new HttpRequest((String)entry.getValue());
                     int status = request.makeRequest();
 
@@ -39,6 +43,7 @@ public class DataLoader {
                         String jsonContent = request.getContent();
                         loadedListener.onDataLoaded((String)entry.getKey(), jsonContent);
                     }
+                    else Log.d(CurrencyList.TAG,"DataLoader: HttpRequest notOk " );
                 }
             });
         }

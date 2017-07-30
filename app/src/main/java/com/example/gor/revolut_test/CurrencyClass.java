@@ -9,7 +9,7 @@ import java.util.HashMap;
 public class CurrencyClass {
 
     private String currencyName;
-    private HashMap<String, Double> currencyRates;
+    private HashMap<String, Double> currencyRates = new HashMap<>();
 
     public CurrencyClass(String currencyName){
         this.currencyName = currencyName;

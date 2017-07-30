@@ -5,6 +5,9 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.util.Log;
+
+import com.example.gor.revolut_test.CurrencyList;
 
 /**
  * Created by Gor on 25.07.2017.
@@ -20,6 +23,7 @@ public class LoadService extends Service{
             new DataLoader.DataHasBeenLoadedListener() {
                 @Override
                 public void onDataLoaded(String currencyFrom, String jsonContent) {
+                    Log.d(CurrencyList.TAG,"DataHasBeenLoadedListener: " + currencyFrom);
                     JSONHandler.dataFilling(currencyFrom, jsonContent);
 
                     mNotifyListener.onNotify();
@@ -29,13 +33,18 @@ public class LoadService extends Service{
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
+        Log.d(CurrencyList.TAG,"LoadService: onBind " );
         mDataSource = new DataLoader(mLoadedListener);
-        mDataSource.toLoadData();
+        //mDataSource.toLoadData();
         return mBinder;
     }
 
     public void setNotifyListener(NotifyListener mNotifyListener) {
         this.mNotifyListener = mNotifyListener;
+    }
+
+    public void loadData(){
+        mDataSource.toLoadData();
     }
 
     public class MyBinder extends Binder {

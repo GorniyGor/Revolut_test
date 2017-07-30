@@ -1,8 +1,11 @@
 package com.example.gor.revolut_test.Internet;
 
+import android.util.Log;
+
 import com.example.gor.revolut_test.CurrencyClass;
 import com.example.gor.revolut_test.CurrencyList;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -19,14 +22,20 @@ class JSONHandler {
         String key;
 
 
+        Log.d(CurrencyList.TAG,"JSONHandler: data filling");
         try{
+            Log.d(CurrencyList.TAG,"JSONHandler: try");
             dataJsonObj = new JSONObject(jsonString);
             JSONObject rates = dataJsonObj.getJSONObject("rates");
+            JSONArray rateKeys = rates.names();
+
             for (int i = 0; i < rates.length(); i++) {
-                key = rates.keys().next();
+                key = (String) rateKeys.get(i);
                 newCurrency.setCurrencyRate(key, rates.getDouble(key));
+                Log.d(CurrencyList.TAG,"JSONHandler: " + currencyFrom + " " + key);
             }
             mCurList.setCurrency(currencyFrom, newCurrency);
+            Log.d(CurrencyList.TAG,"JSONHandler: after for");
 
         }
         catch (JSONException ex){ ex.printStackTrace(); }

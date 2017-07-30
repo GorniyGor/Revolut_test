@@ -14,6 +14,18 @@
         android:background="@color/colorPrimary"
         android:navigationIcon="@drawable/back">
 
+        <TextView
+            android:id="@+id/id_text_toolbar_rate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="*1 = *0.0000"
+            android:textColor="#ffffff"
+            android:textSize="27sp"
+            android:background="@drawable/corner"
+
+            android:padding="5sp"
+            android:layout_marginLeft="50sp"/>
+
     </Toolbar>
 
     <android.support.v7.widget.RecyclerView

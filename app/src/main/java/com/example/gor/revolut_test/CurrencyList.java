@@ -6,7 +6,6 @@ import android.view.ViewGroup;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeMap;
 
 /**
  * Created by Gor on 26.07.2017.
@@ -16,16 +15,16 @@ import java.util.TreeMap;
 
 public class CurrencyList {
 
-    private static final String TAG = "myLogs" ;
+    public static final String TAG = "myLogs" ;
 
     public static HashMap<String, String> FX_URL = new HashMap<>();
 
     public static volatile CurrencyList sSelf;
-    private HashMap<ViewGroup, String> currentlyExchange = new HashMap<>();
-    private String otherCurrency; //---Нужно для метода getCurrencyFrom
+    private HashMap<ViewGroup, String>  currentlyExchange = new HashMap<>();
+    private String otherCurrency = "GBP" ; //---Нужно для метода getCurrencyFrom
 
-    TreeMap<String, CurrencyClass> exchangeRate = new TreeMap<>();
-    ArrayList<String> positionOfCurrency = new ArrayList<>();
+    HashMap<String, CurrencyClass> exchangeRate = new HashMap<>();
+    ArrayList<String> positionOfCurrency = new ArrayList<>(); //--Optimization--Вместо него можно FX_URL ArrayList
     String currentCurrencyFrom;
 
     public static CurrencyList getInstance(){
@@ -44,16 +43,23 @@ public class CurrencyList {
 
     public void setCurrency(String nameFrom, CurrencyClass mCurrency){
         exchangeRate.put(nameFrom,mCurrency);
-        positionOfCurrency.add(exchangeRate.lastKey());
+        positionOfCurrency.add(nameFrom);
     }
 
     public double getRate(String currencyTo){
-        return exchangeRate.get(currentCurrencyFrom).getRate(currencyTo);
+        if(currencyTo != currentCurrencyFrom) {
+            return exchangeRate.get(currentCurrencyFrom).getRate(currencyTo);
+        }
+        else return 1;
     }
 
     public String getCurrencyName(int position){
-        currentCurrencyFrom = positionOfCurrency.get(position);
-        return currentCurrencyFrom;
+
+        if(positionOfCurrency.size() != 0) {
+            currentCurrencyFrom = positionOfCurrency.get(position);
+            return currentCurrencyFrom;
+        }
+        return null;
     }
 
 
