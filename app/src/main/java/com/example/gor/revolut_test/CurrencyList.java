@@ -55,7 +55,7 @@ public class CurrencyList {
 
     public String getCurrencyName(int position){
 
-        if(positionOfCurrency.size() != 0) {
+        if(positionOfCurrency.size() > position) {
             currentCurrencyFrom = positionOfCurrency.get(position);
             return currentCurrencyFrom;
         }

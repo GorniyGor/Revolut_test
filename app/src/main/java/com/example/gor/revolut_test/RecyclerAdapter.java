@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import com.example.gor.revolut_test.Internet.LoadService;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import static android.content.Context.BIND_AUTO_CREATE;
@@ -29,6 +30,10 @@ class RecyclerAdapter extends RecyclerView.Adapter<SimpleViewHolder>{
     private CurrencyList mCurList;
     private ViewGroup mParent;
 
+    //--Для предотвращения зацикливания из-за нотификации другого ресайклера
+    private ArrayList<Double> checkRates = new ArrayList<>();
+    private NotifyRecyclerChanged mNotifyRecyclerChanged;
+
     //-----------------------
 
     private LoadService service;
@@ -38,6 +43,8 @@ class RecyclerAdapter extends RecyclerView.Adapter<SimpleViewHolder>{
             LoadService.MyBinder b = (LoadService.MyBinder) binder;
             service = b.getService();
             Log.d(CurrencyList.TAG,"onServiceConnected: getService" );
+
+            notifyDataSetChanged();
         }
 
         @Override
@@ -60,9 +67,13 @@ class RecyclerAdapter extends RecyclerView.Adapter<SimpleViewHolder>{
     //-----------------------
 
 
-    public RecyclerAdapter(LayoutInflater layoutInflater){
-        localInflater = new WeakReference<LayoutInflater>(layoutInflater);
+    public RecyclerAdapter(LayoutInflater layoutInflater, NotifyRecyclerChanged notifyRecyclerChanged ){
+
+        //---Для NotifyRecyclerChanged--
+        mNotifyRecyclerChanged = notifyRecyclerChanged;
+        for(int i = 0; i < 3; i++) checkRates.add(i, 0.0);
         //----------------
+        localInflater = new WeakReference<LayoutInflater>(layoutInflater);
         Intent intent = new Intent(localInflater.get().getContext(), LoadService.class);
         localInflater.get().getContext().bindService(intent, serviceConnection, BIND_AUTO_CREATE);
         //------------------
@@ -87,7 +98,7 @@ class RecyclerAdapter extends RecyclerView.Adapter<SimpleViewHolder>{
             if (service != null) {
                 Log.d(CurrencyList.TAG,"RecyclerAdapter: there has been set NOTIFYLISTENER " );
                 service.setNotifyListener(mNotifyListener);
-                if(mCurList.exchangeRate.size() == 0) service.loadData();
+                service.loadData();
             }
 
             return new SimpleViewHolder(inflater.inflate(R.layout.recycler_view, parent, false));
@@ -102,26 +113,37 @@ class RecyclerAdapter extends RecyclerView.Adapter<SimpleViewHolder>{
 
         Log.d(CurrencyList.TAG,"RecyclerAdapter: onBindViewHolder" );
 
+        //-Problem-- Не успели скачаться все данные
         String ownCurrencyName = mCurList.getCurrencyName(position);
 
         if(service != null && ownCurrencyName != null) {
 
             Log.d(CurrencyList.TAG,"RecyclerAdapter: service != null " );
 
-
-
-
-            //--Для информированности другой вью, какая мы сейчас валюта.
-            //---может можно было использовать интерфейс для этой цели---
-            //-Optimization-- А ещё зачем передавать ownCurrencyName туда, откуда мы его взяли? (риторический)
-            //-Problem-- Вью не обновляется при смене вьюшкой валюты
-            mCurList.setCurrentlyExchange(mParent, ownCurrencyName);
-
-            holder.setCurrancyName(ownCurrencyName);
-            //-Error--Ошибка потому что на данном этапе не добавлена вторая валюта в currentExchange.
-            //-Solution--Может быть нужно изначально его дефолтом заполнить
             String currencyTo = mCurList.getCurrencyFrom(mParent);
-            holder.setCurrancyRate(mCurList.getRate(currencyTo));
+            double rate = mCurList.getRate(currencyTo);
+
+            if(checkRates.get(position) != rate) {
+
+                Log.d(CurrencyList.TAG,"RecyclerAdapter: rates changed " );
+
+                //--Для информированности другой вью, какая мы сейчас валюта.
+                //---может можно было использовать интерфейс для этой цели---
+                //-Optimization-- А ещё зачем передавать ownCurrencyName туда, откуда мы его взяли? (риторический)
+                //-Problem-- Вью не обновляется при смене вьюшкой валюты
+                mCurList.setCurrentlyExchange(mParent, ownCurrencyName);
+
+                holder.setCurrancyName(ownCurrencyName);
+                //-Error--Ошибка потому что на данном этапе не добавлена вторая валюта в currentExchange.
+                //-Solution--Может быть нужно изначально его дефолтом заполнить -- Done, но не очень (просто присволи строку)
+
+                holder.setCurrancyRate(rate);
+
+                checkRates.set(position, rate);
+                mNotifyRecyclerChanged.onNotify();
+            }
+
+
 
         }
     }
@@ -129,5 +151,9 @@ class RecyclerAdapter extends RecyclerView.Adapter<SimpleViewHolder>{
     @Override
     public int getItemCount() {
         return 3;
+    }
+
+    public interface NotifyRecyclerChanged {
+        void onNotify();
     }
 }
