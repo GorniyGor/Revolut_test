@@ -1,7 +1,7 @@
 package com.example.gor.revolut_test;
 
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.ViewGroup;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,12 +20,12 @@ public class CurrencyList {
     public static HashMap<String, String> FX_URL = new HashMap<>();
 
     public static volatile CurrencyList sSelf;
-    private HashMap<ViewGroup, String>  currentlyExchange = new HashMap<>();
-    private String otherCurrency = "GBP" ; //---Нужно для метода getCurrencyFrom
+    private HashMap<RecyclerView, Integer>  currentlyExchange = new HashMap<>();
+    private String otherCurrency; //---Нужно для метода getCurrencyFrom
 
-    HashMap<String, CurrencyClass> exchangeRate = new HashMap<>();
-    ArrayList<String> positionOfCurrency = new ArrayList<>(); //--Optimization--Вместо него можно FX_URL ArrayList
-    String currentCurrencyFrom;
+    private HashMap<String, CurrencyClass> exchangeRate = new HashMap<>();
+    private ArrayList<String> positionOfCurrency = new ArrayList<>(); //--Optimization--Вместо него можно FX_URL ArrayList
+    private String currentCurrencyFrom;
 
     public static CurrencyList getInstance(){
         if(sSelf == null){
@@ -67,20 +67,21 @@ public class CurrencyList {
 
     //---Необходимо для понимания, какие именно валюты в ланный момент нужно обменивать
     //---А для этого нужно понимать, какая валюта стоит в другой вьюшке
-    public void setCurrentlyExchange(ViewGroup parent, String currency){
-        currentlyExchange.put(parent, currency);
+    public void setCurrentlyExchange(RecyclerView name, Integer currency){
+        currentlyExchange.put(name, currency);
     }
+    public int getCurrentlyExchangeSize(){return currentlyExchange.size();}
 
     //---В структуре currentlyExchange должно быть только 2 элемента,
     //---соответственно для одной вьюшки и для другой.
     //---Нам нужно взять название валюты у другой (не собственной) вьюшки
-    public String getCurrencyFrom(ViewGroup ownParent){
+    public String getCurrencyFrom(RecyclerView name){
 
         if(currentlyExchange.size() > 2) Log.d(TAG, "getCurrencyFrom: ViewGroup parents too many!");
 
         for(Map.Entry entry : currentlyExchange.entrySet()){
-            if(!ownParent.equals(entry.getKey())){
-                otherCurrency = (String) entry.getValue();
+            if(!name.equals(entry.getKey())){
+                otherCurrency = positionOfCurrency.get((Integer) entry.getValue());
             }
         }
         return otherCurrency;

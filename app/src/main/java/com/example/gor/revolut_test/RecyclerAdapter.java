@@ -6,7 +6,6 @@ import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -18,80 +17,44 @@ class RecyclerAdapter extends RecyclerView.Adapter<SimpleViewHolder>{
     public static HashMap<String, String> FX_URL = CurrencyList.FX_URL;
 
     private final WeakReference<LayoutInflater> localInflater;
-    //private LoadService mService;//----Тоже лучше weakReference
     private CurrencyList mCurList;
-    private ViewGroup mParent;
+    private RecyclerView name;
 
-    //--Для предотвращения зацикливания из-за нотификации другого ресайклера
+    /*//--Для предотвращения зацикливания из-за нотификации другого ресайклера
     private ArrayList<Double> checkRates = new ArrayList<>();
-    private NotifyRecyclerChanged mNotifyRecyclerChanged;
+    private NotifyRecyclerChanged mNotifyRecyclerChanged;*/
 
     //-----------------------
-
-    /*private LoadService service;
-    private ServiceConnection serviceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder binder) {
-            LoadService.MyBinder b = (LoadService.MyBinder) binder;
-            service = b.getService();
-            Log.d(CurrencyList.TAG,"onServiceConnected: getService" );
-
-            notifyDataSetChanged();
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            service = null;
-        }
-    };
-
-    LoadService.NotifyListener mNotifyListener = new LoadService.NotifyListener() {
-        @Override
-        public void onNotify() {
-            *//*for (int i=0;i<3;i++) {
-                notifyItemChanged(i);
-            }*//*
-            notifyDataSetChanged();
-            Log.d(CurrencyList.TAG,"RecyclerAdapter: there has been DONE NOTIFY " );
-        }
-    };*/
 
     //-----------------------
 
 
-    public RecyclerAdapter(LayoutInflater layoutInflater, NotifyRecyclerChanged notifyRecyclerChanged ){
+    public RecyclerAdapter(LayoutInflater layoutInflater/*, String name*/ /*NotifyRecyclerChanged notifyRecyclerChanged*/ ){
 
-        //---Для NotifyRecyclerChanged--
+        /*//---Для NotifyRecyclerChanged--
         mNotifyRecyclerChanged = notifyRecyclerChanged;
-        for(int i = 0; i < 3; i++) checkRates.add(i, 0.0);
+        for(int i = 0; i < 3; i++) checkRates.add(i, 0.0);*/
         //----------------
-        localInflater = new WeakReference<LayoutInflater>(layoutInflater);
-        /*Intent intent = new Intent(localInflater.get().getContext(), LoadService.class);
-        localInflater.get().getContext().bindService(intent, serviceConnection, BIND_AUTO_CREATE);*/
-        //------------------
 
-/*        mService = service;*/
+        localInflater = new WeakReference<LayoutInflater>(layoutInflater);
         mCurList = CurrencyList.getInstance();
+        /*this.name = name;*/
     }
 
-    /*LoadService.NotifyListener mNotifyListener = new LoadService.NotifyListener() {
-        @Override
-        public void onNotify() {
-            notifyDataSetChanged();
-        }
-    };*/
+    //--Мне нужен экземпляр ресайклервью для идентифицирования вью, которая работает,
+    //--чтобы пользоваться массивом CurrencyList.currentlyExchange
+    @Override
+    public void onAttachedToRecyclerView(RecyclerView recyclerView){
+        super.onAttachedToRecyclerView(recyclerView);
+
+        name = recyclerView;
+    }
 
     @Override
     public SimpleViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater inflater = localInflater.get();
         if(inflater != null){
-            mParent = parent;
-
-            /*if (service != null) {
-                Log.d(CurrencyList.TAG,"RecyclerAdapter: there has been set NOTIFYLISTENER " );
-                service.setNotifyListener(mNotifyListener);
-                service.loadData();
-            }*/
+            /*mParent = parent;*/
 
             return new SimpleViewHolder(inflater.inflate(R.layout.recycler_view, parent, false));
         }
@@ -112,10 +75,8 @@ class RecyclerAdapter extends RecyclerView.Adapter<SimpleViewHolder>{
 
             Log.d(CurrencyList.TAG,"RecyclerAdapter: service != null " );
 
-            String currencyTo = mCurList.getCurrencyFrom(mParent);
+            String currencyTo = mCurList.getCurrencyFrom(name);
             double rate = mCurList.getRate(currencyTo);
-
-            if(checkRates.get(position) != rate) {
 
                 Log.d(CurrencyList.TAG,"RecyclerAdapter: rates changed " );
 
@@ -123,7 +84,7 @@ class RecyclerAdapter extends RecyclerView.Adapter<SimpleViewHolder>{
                 //---может можно было использовать интерфейс для этой цели---
                 //-Optimization-- А ещё зачем передавать ownCurrencyName туда, откуда мы его взяли? (риторический)
                 //-Problem-- Вью не обновляется при смене вьюшкой валюты
-                mCurList.setCurrentlyExchange(mParent, ownCurrencyName);
+                /*mCurList.setCurrentlyExchange(mParent, ownCurrencyName);*/
 
                 holder.setCurrancyName(ownCurrencyName);
                 //-Error--Ошибка потому что на данном этапе не добавлена вторая валюта в currentExchange.
@@ -131,9 +92,8 @@ class RecyclerAdapter extends RecyclerView.Adapter<SimpleViewHolder>{
 
                 holder.setCurrancyRate(rate);
 
-                checkRates.set(position, rate);
-                mNotifyRecyclerChanged.onNotify();
-            }
+                /*checkRates.set(position, rate);
+                mNotifyRecyclerChanged.onNotify();*/
 
 
 
@@ -145,7 +105,7 @@ class RecyclerAdapter extends RecyclerView.Adapter<SimpleViewHolder>{
         return 3;
     }
 
-    public interface NotifyRecyclerChanged {
+    /*public interface NotifyRecyclerChanged {
         void onNotify();
-    }
+    }*/
 }

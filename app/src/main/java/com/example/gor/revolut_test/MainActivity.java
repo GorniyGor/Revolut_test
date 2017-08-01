@@ -143,10 +143,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public class RecyclerBroadcastReceiver extends BroadcastReceiver {
+        private static final String idRecyclerTop = "TOP";
+        private static final String idRecyclerBottom = "BOTTOM";
+
         RecyclerView mRecyclerViewTop;
         RecyclerView mRecyclerViewBottom;
         private RecyclerAdapter mRecyclerAdapterTop;
         private RecyclerAdapter mRecyclerAdapterBottom;
+        private CurrencyList mCurList = CurrencyList.getInstance();;
 
 
         @Override
@@ -157,7 +161,7 @@ public class MainActivity extends AppCompatActivity {
                 mRecyclerViewTop = (RecyclerView) findViewById(R.id.id_recycler_top);
                 mRecyclerViewBottom = (RecyclerView) findViewById(R.id.id_recycler_bottom);
 
-                RecyclerAdapter.NotifyRecyclerChanged mNotifyRecyclerChangedTop =
+               /* RecyclerAdapter.NotifyRecyclerChanged mNotifyRecyclerChangedTop =
                         new RecyclerAdapter.NotifyRecyclerChanged() {
                             @Override
                             public void onNotify() {
@@ -170,18 +174,20 @@ public class MainActivity extends AppCompatActivity {
                             public void onNotify() {
                                 mRecyclerViewTop.getAdapter().notifyDataSetChanged();
                             }
-                        };
+                        };*/
 
 
-                mRecyclerAdapterTop = new RecyclerAdapter(getLayoutInflater(), mNotifyRecyclerChangedTop);
-                mRecyclerAdapterBottom = new RecyclerAdapter(getLayoutInflater(), mNotifyRecyclerChangedBottom);
+                mRecyclerAdapterTop =
+                        new RecyclerAdapter(getLayoutInflater()/*, idRecyclerTop*/ /* mNotifyRecyclerChangedTop*/);
+                mRecyclerAdapterBottom =
+                        new RecyclerAdapter(getLayoutInflater()/*, idRecyclerBottom*/ /*mNotifyRecyclerChangedBottom*/);
 
 
                 //---First recycler------
 
                 mRecyclerViewTop.setAdapter(mRecyclerAdapterTop);
                 mRecyclerViewTop.setLayoutManager(
-                        new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false));
+                        new MyLayoutManager(context,LinearLayoutManager.HORIZONTAL,false));
 
                 mRecyclerViewTop.setHasFixedSize(true);
 
@@ -191,7 +197,7 @@ public class MainActivity extends AppCompatActivity {
 
                 mRecyclerViewBottom.setAdapter(mRecyclerAdapterBottom);
                 mRecyclerViewBottom.setLayoutManager(
-                        new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false));
+                        new MyLayoutManager(context,LinearLayoutManager.HORIZONTAL,false));
 
                 mRecyclerViewBottom.setHasFixedSize(true);
 
@@ -200,9 +206,15 @@ public class MainActivity extends AppCompatActivity {
 
                 //----------------------------
 
+                //--Вызывается когда произошла закачка данных из сети--
                 LoadService.NotifyListener mNotifyListener = new LoadService.NotifyListener() {
                     @Override
                     public void onNotify() {
+                        if(mCurList.getCurrentlyExchangeSize() == 0){
+                            mCurList.setCurrentlyExchange(mRecyclerViewTop, 0);
+                            mCurList.setCurrentlyExchange(mRecyclerViewBottom, 0);
+                        }
+
                         mRecyclerViewTop.getAdapter().notifyDataSetChanged();
                         mRecyclerViewBottom.getAdapter().notifyDataSetChanged();
                     }
@@ -217,5 +229,30 @@ public class MainActivity extends AppCompatActivity {
             }
 
         }
+
+        public class MyLayoutManager extends LinearLayoutManager{
+
+            public MyLayoutManager(Context context, int orientation, boolean reverseLayout) {
+                super(context, orientation, reverseLayout);
+            }
+
+            //--Problem--Не вызывается
+            //--Отвечает за обновление данных на вью при смене элемента (при сайпе)--
+            @Override
+            public void onItemsMoved(RecyclerView recyclerView, int from, int to, int itemCount){
+                super.onItemsMoved(recyclerView, from, to, itemCount);
+
+                //--Не понятно что именно такое from и to--
+                Log.d(CurrencyList.TAG,"MainActivity, LayoutManager.onItemMoved: from-" + from +
+                                " to-" + to );
+                mCurList.setCurrentlyExchange(recyclerView, to);
+
+                mRecyclerViewBottom.getAdapter().notifyDataSetChanged();
+                mRecyclerViewTop.getAdapter().notifyDataSetChanged();
+
+            }
+        }
     }
+
+
 }
