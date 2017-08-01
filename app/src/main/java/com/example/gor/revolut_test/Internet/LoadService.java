@@ -35,7 +35,7 @@ public class LoadService extends Service{
     public IBinder onBind(Intent intent) {
         Log.d(CurrencyList.TAG,"LoadService: onBind " );
         mDataSource = new DataLoader(mLoadedListener);
-        //mDataSource.toLoadData();
+        mDataSource.toLoadData();
         return mBinder;
     }
 

@@ -1,21 +1,13 @@
 package com.example.gor.revolut_test;
 
-import android.content.ComponentName;
-import android.content.Intent;
-import android.content.ServiceConnection;
-import android.os.IBinder;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
-import com.example.gor.revolut_test.Internet.LoadService;
-
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
-
-import static android.content.Context.BIND_AUTO_CREATE;
 
 /**
  * Created by Gor on 24.07.2017.
@@ -26,7 +18,7 @@ class RecyclerAdapter extends RecyclerView.Adapter<SimpleViewHolder>{
     public static HashMap<String, String> FX_URL = CurrencyList.FX_URL;
 
     private final WeakReference<LayoutInflater> localInflater;
-    private LoadService mService;//----Тоже лучше weakReference
+    //private LoadService mService;//----Тоже лучше weakReference
     private CurrencyList mCurList;
     private ViewGroup mParent;
 
@@ -36,7 +28,7 @@ class RecyclerAdapter extends RecyclerView.Adapter<SimpleViewHolder>{
 
     //-----------------------
 
-    private LoadService service;
+    /*private LoadService service;
     private ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder binder) {
@@ -56,13 +48,13 @@ class RecyclerAdapter extends RecyclerView.Adapter<SimpleViewHolder>{
     LoadService.NotifyListener mNotifyListener = new LoadService.NotifyListener() {
         @Override
         public void onNotify() {
-            /*for (int i=0;i<3;i++) {
+            *//*for (int i=0;i<3;i++) {
                 notifyItemChanged(i);
-            }*/
+            }*//*
             notifyDataSetChanged();
             Log.d(CurrencyList.TAG,"RecyclerAdapter: there has been DONE NOTIFY " );
         }
-    };
+    };*/
 
     //-----------------------
 
@@ -74,8 +66,8 @@ class RecyclerAdapter extends RecyclerView.Adapter<SimpleViewHolder>{
         for(int i = 0; i < 3; i++) checkRates.add(i, 0.0);
         //----------------
         localInflater = new WeakReference<LayoutInflater>(layoutInflater);
-        Intent intent = new Intent(localInflater.get().getContext(), LoadService.class);
-        localInflater.get().getContext().bindService(intent, serviceConnection, BIND_AUTO_CREATE);
+        /*Intent intent = new Intent(localInflater.get().getContext(), LoadService.class);
+        localInflater.get().getContext().bindService(intent, serviceConnection, BIND_AUTO_CREATE);*/
         //------------------
 
 /*        mService = service;*/
@@ -95,11 +87,11 @@ class RecyclerAdapter extends RecyclerView.Adapter<SimpleViewHolder>{
         if(inflater != null){
             mParent = parent;
 
-            if (service != null) {
+            /*if (service != null) {
                 Log.d(CurrencyList.TAG,"RecyclerAdapter: there has been set NOTIFYLISTENER " );
                 service.setNotifyListener(mNotifyListener);
                 service.loadData();
-            }
+            }*/
 
             return new SimpleViewHolder(inflater.inflate(R.layout.recycler_view, parent, false));
         }
@@ -116,7 +108,7 @@ class RecyclerAdapter extends RecyclerView.Adapter<SimpleViewHolder>{
         //-Problem-- Не успели скачаться все данные
         String ownCurrencyName = mCurList.getCurrencyName(position);
 
-        if(service != null && ownCurrencyName != null) {
+        if(/*service != null &&*/ ownCurrencyName != null) {
 
             Log.d(CurrencyList.TAG,"RecyclerAdapter: service != null " );
 
