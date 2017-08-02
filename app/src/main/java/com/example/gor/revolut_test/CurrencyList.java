@@ -18,6 +18,7 @@ public class CurrencyList {
     public static final String TAG = "myLogs" ;
 
     public static HashMap<String, String> FX_URL = new HashMap<>();
+    public static final HashMap<String, RecyclerView> RV_NAMES = new HashMap<>();
 
     public static volatile CurrencyList sSelf;
     private HashMap<RecyclerView, Integer>  currentlyExchange = new HashMap<>();
@@ -75,12 +76,17 @@ public class CurrencyList {
     //---В структуре currentlyExchange должно быть только 2 элемента,
     //---соответственно для одной вьюшки и для другой.
     //---Нам нужно взять название валюты у другой (не собственной) вьюшки
-    public String getCurrencyFrom(RecyclerView name){
+    public String getCurrencyFrom(String  name){
+
+        Log.d(TAG, "getCurrencyFrom: RecyclerView " + name + " = " + RV_NAMES.get(name).toString());
+        RecyclerView currency = RV_NAMES.get(name);
 
         if(currentlyExchange.size() > 2) Log.d(TAG, "getCurrencyFrom: ViewGroup parents too many!");
 
+        Log.d(TAG, "getCurrencyFrom: currentlyExchange is empty? - " + currentlyExchange.isEmpty());
         for(Map.Entry entry : currentlyExchange.entrySet()){
-            if(!name.equals(entry.getKey())){
+            Log.d(TAG, "getCurrencyFrom: currentlyExchange " + entry.getKey() + " = " + entry.getValue());
+            if(!currency.equals(entry.getKey())){
                 otherCurrency = positionOfCurrency.get((Integer) entry.getValue());
             }
         }

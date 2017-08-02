@@ -1,7 +1,6 @@
 package com.example.gor.revolut_test;
 
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
@@ -18,7 +17,7 @@ class RecyclerAdapter extends RecyclerView.Adapter<SimpleViewHolder>{
 
     private final WeakReference<LayoutInflater> localInflater;
     private CurrencyList mCurList;
-    private RecyclerView name;
+    private String name;
 
     /*//--Для предотвращения зацикливания из-за нотификации другого ресайклера
     private ArrayList<Double> checkRates = new ArrayList<>();
@@ -29,7 +28,7 @@ class RecyclerAdapter extends RecyclerView.Adapter<SimpleViewHolder>{
     //-----------------------
 
 
-    public RecyclerAdapter(LayoutInflater layoutInflater/*, String name*/ /*NotifyRecyclerChanged notifyRecyclerChanged*/ ){
+    public RecyclerAdapter(LayoutInflater layoutInflater, String name /*NotifyRecyclerChanged notifyRecyclerChanged*/ ){
 
         /*//---Для NotifyRecyclerChanged--
         mNotifyRecyclerChanged = notifyRecyclerChanged;
@@ -38,23 +37,24 @@ class RecyclerAdapter extends RecyclerView.Adapter<SimpleViewHolder>{
 
         localInflater = new WeakReference<LayoutInflater>(layoutInflater);
         mCurList = CurrencyList.getInstance();
-        /*this.name = name;*/
+        this.name = name;
     }
 
     //--Мне нужен экземпляр ресайклервью для идентифицирования вью, которая работает,
     //--чтобы пользоваться массивом CurrencyList.currentlyExchange
-    @Override
+   /* @Override
     public void onAttachedToRecyclerView(RecyclerView recyclerView){
         super.onAttachedToRecyclerView(recyclerView);
 
         name = recyclerView;
-    }
+    }*/
 
     @Override
     public SimpleViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater inflater = localInflater.get();
         if(inflater != null){
             /*mParent = parent;*/
+            /*name = (RecyclerView) parent;*/
 
             return new SimpleViewHolder(inflater.inflate(R.layout.recycler_view, parent, false));
         }
@@ -66,19 +66,16 @@ class RecyclerAdapter extends RecyclerView.Adapter<SimpleViewHolder>{
     @Override
     public void onBindViewHolder(SimpleViewHolder holder, int position) {
 
-        Log.d(CurrencyList.TAG,"RecyclerAdapter: onBindViewHolder" );
-
         //-Problem-- Не успели скачаться все данные
         String ownCurrencyName = mCurList.getCurrencyName(position);
 
         if(/*service != null &&*/ ownCurrencyName != null) {
 
-            Log.d(CurrencyList.TAG,"RecyclerAdapter: service != null " );
-
             String currencyTo = mCurList.getCurrencyFrom(name);
-            double rate = mCurList.getRate(currencyTo);
 
-                Log.d(CurrencyList.TAG,"RecyclerAdapter: rates changed " );
+            //--Из-за race condition адаптера и окончания закачки--
+            if(currencyTo!=null) {
+                double rate = mCurList.getRate(currencyTo);
 
                 //--Для информированности другой вью, какая мы сейчас валюта.
                 //---может можно было использовать интерфейс для этой цели---
@@ -94,6 +91,8 @@ class RecyclerAdapter extends RecyclerView.Adapter<SimpleViewHolder>{
 
                 /*checkRates.set(position, rate);
                 mNotifyRecyclerChanged.onNotify();*/
+            }
+
 
 
 
