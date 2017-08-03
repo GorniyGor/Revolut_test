@@ -1,5 +1,7 @@
 package com.example.gor.revolut_test;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -21,6 +23,7 @@ public class MainActivity extends AppCompatActivity {
 
     public final static String BR_ACTION = "com.example.gor.revolut_test";
     public final static String UPDATE_ACTION = "update data into recycler";
+    public final static String LOAD_ACTION = "com.example.gor.revolut_test_load_data";
 
     private LoadService service;
     private ServiceConnection serviceConnection;
@@ -61,7 +64,11 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        unbindService(serviceConnection);
+        AlarmManager alarmManagerCancled = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
+        alarmManagerCancled.cancel(PendingIntent.getBroadcast(this, 0,
+                new Intent(this, LoadBroadcastReceiver.class), 0));
+        unbindService(serviceConnection);/*
+        unregisterReceiver(new RecyclerBroadcastReceiver.DataUpdateBroadcastReceiver());*/
         unregisterReceiver(broadcastReceiver);
     }
 
@@ -74,12 +81,11 @@ public class MainActivity extends AppCompatActivity {
         private RecyclerAdapter mRecyclerAdapterTop;
         private RecyclerAdapter mRecyclerAdapterBottom;
         private CurrencyList mCurList = CurrencyList.getInstance();
+        private AlarmManager mAlarmManager;
 
 
         @Override
         public void onReceive(Context context, Intent intent) {
-
-            if(intent.getAction().equals(BR_ACTION)) {
 
                 registerReceiver(new DataUpdateBroadcastReceiver(), new IntentFilter(UPDATE_ACTION));
 
@@ -95,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
 
                         //--Problem--Почему то не меняется вид сразу после вызова.
                         // Остаётся, что бы ло нарисовано в xml. После какого-либо действия одновляется в норму
-                        //--Solution--Делаем разнесенные вызовы с помощью бродкаст
+                        //--Solution--Делаем разнесенные вызовы с помощью бродкаст - плохое решение
                         Log.d(CurrencyList.TAG,"MainActivity: NotifyListener.onNotify setCurrentlyExchange" );
 
                         sendBroadcast(new Intent().setAction(UPDATE_ACTION));
@@ -137,7 +143,7 @@ public class MainActivity extends AppCompatActivity {
                 //--Problem--1)Ложные срабатывания - подёргивания, но не полные сдвиги +
                 //+ 2)Сама вью почему-то не обновляется для изменения курса при изменении валюты другой вью
                 //  2)На самом деле, просто рано вызывались обновления экрана
-                //--Solution 2)--Делаем разнесенные вызовы с помощью бродкаст
+                //--Solution 2)--Делаем разнесенные вызовы с помощью бродкаст - плохое решение
                 SnapHelper mSnapHelperTop = new PagerSnapHelper() {
                     @Override
                     public boolean onFling (int velocityX, int velocityY){
@@ -185,26 +191,34 @@ public class MainActivity extends AppCompatActivity {
 
                 //----------------------------
 
-                service.loadData();
+            //------Пероидизация подкачки данных с сайта---
+            service.loadData();
+            mAlarmManager = (AlarmManager) context.getSystemService(ALARM_SERVICE);
+            //--Просмотреть каждое действие в строке и искать момент вызова onReceive
+            // (сопоставя с sendBroadcast)
 
-            }
+            Intent alarmIntent = new Intent(context, LoadBroadcastReceiver.class);
+            alarmIntent.setAction(LOAD_ACTION);
+            PendingIntent alarmPending = PendingIntent.getBroadcast(context, 0, alarmIntent, 0);
+            //--maybeProblem--Система сдигает время до 60000 mls
+            mAlarmManager.setRepeating(AlarmManager.RTC, System.currentTimeMillis(), 30000, alarmPending);
 
         }
 
         //--Для обновления курсов на экране при смене валют.
         //Бродкаст нужен, чтобы изменения данных успевали происходить в системе,
-        //т.е. просто для разнесенных по времени вызовов
+        //т.е. просто для разнесенных по времени вызовов - плохое решение
         public class DataUpdateBroadcastReceiver extends BroadcastReceiver{
 
             @Override
             public void onReceive(Context context, Intent intent) {
-                Log.d(CurrencyList.TAG,"MainActivity: DataUpdateBroadcastReceiver.onReceive UUUUUUUUUUPDATE DDDDDDATA" );
+                Log.d(CurrencyList.TAG,"MainActivity: DataUpdateBroadcastReceiver.onReceive " +
+                        "UUUUUUUUUUPDATE DDDDDDATA" );
                 mRecyclerViewTop.getAdapter().notifyDataSetChanged();
                 mRecyclerViewBottom.getAdapter().notifyDataSetChanged();
             }
         }
     }
-
 
 
 

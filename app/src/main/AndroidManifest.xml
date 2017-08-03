@@ -17,10 +17,20 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <service
-            android:name="com.example.gor.revolut_test.Internet.LoadService"
+            android:name=".Internet.LoadService"
             android:enabled="true"
-            android:exported="true"></service>
+            android:exported="true" />
+
+        <receiver
+            android:name=".LoadBroadcastReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.example.gor.revolut_test_load_data" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>
