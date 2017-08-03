@@ -19,10 +19,6 @@ import com.example.gor.revolut_test.Internet.LoadService;
 
 public class MainActivity extends AppCompatActivity {
 
-    /*RecyclerView mRecyclerViewTop;
-    RecyclerView mRecyclerViewBottom;
-    private RecyclerAdapter mRecyclerAdapterTop;
-    private RecyclerAdapter mRecyclerAdapterBottom;*/
     public final static String BR_ACTION = "com.example.gor.revolut_test";
 
     private LoadService service;
@@ -39,11 +35,7 @@ public class MainActivity extends AppCompatActivity {
 
  /*       Toolbar mToolbar = (Toolbar) findViewById(R.id.id_toolbar_fx);
         setSupportActionBar(mToolbar);*/
-        //---Тулбар менять через интерфейс в адаптере, использую parent из CurrencyList
 
-
-
-        //----Service---------------------------------------
 
         serviceConnection = new ServiceConnection() {
             @Override
@@ -78,7 +70,6 @@ public class MainActivity extends AppCompatActivity {
 
         RecyclerView mRecyclerViewTop;
         RecyclerView mRecyclerViewBottom;
-        //RecyclerView.OnScrollListener scrollListener;
         private RecyclerAdapter mRecyclerAdapterTop;
         private RecyclerAdapter mRecyclerAdapterBottom;
         private CurrencyList mCurList = CurrencyList.getInstance();
@@ -99,6 +90,9 @@ public class MainActivity extends AppCompatActivity {
 
                         }
 
+                        //--Problem--Почему то не меняется вид сразу после вызова.
+                        // Остаётся, что бы ло нарисовано в xml. После какого-либо действия одновляется в норму
+                        //--maybeSolution--В onBindViewHolder выставлять дефлтные значения при null данных.--не прокатило
                         Log.d(CurrencyList.TAG,"MainActivity: NotifyListener.onNotify setCurrentlyExchange" );
                         mRecyclerViewTop.getAdapter().notifyDataSetChanged();
                         mRecyclerViewBottom.getAdapter().notifyDataSetChanged();
@@ -112,46 +106,10 @@ public class MainActivity extends AppCompatActivity {
                 mRecyclerViewBottom = (RecyclerView) findViewById(R.id.id_recycler_bottom);
 
                 //--Нужно для понимания каждым ресайклером, какая валюта в данный момент отображена в другом--
+                //--скорее даже не нужно, т.к. можно в SnapHelper и onNotify просто свои id передавать
                 CurrencyList.RV_NAMES.put(idRecyclerTop, mRecyclerViewTop);
                 CurrencyList.RV_NAMES.put(idRecyclerBottom, mRecyclerViewBottom);
 
-                /*scrollListener = new RecyclerView.OnScrollListener() {
-                    @Override
-                    public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                        super.onScrolled(recyclerView, dx, dy);
-                        Log.d(CurrencyList.TAG,"MainActivity, onScrollListener: dx-" + dx +
-                                " dy-" + dy );
-
-                        *//*if()
-                        mCurList.setCurrentlyExchange(recyclerView, to);
-
-                        mRecyclerViewBottom.getAdapter().notifyDataSetChanged();
-                        mRecyclerViewTop.getAdapter().notifyDataSetChanged();*//*
-
-                    }
-                };*/
-
-                /*scrollListener = new RecyclerView.OnScrollListener() {
-                    @Override
-                    public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                        super.onScrollStateChanged(recyclerView, newState);
-                        Log.d(CurrencyList.TAG,"MainActivity, onScrollListener: new state- " + newState);
-                    }
-                };*/
-
-                /*ItemTouchHelper mItemTouchHelper = new ItemTouchHelper(
-                        new ItemTouchHelper.SimpleCallback(
-                                ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT ) {
-                            @Override
-                            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
-                                return false;
-                            }
-
-                            @Override
-                            public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
-
-                            }
-                        });*/
 
 
                 mRecyclerAdapterTop =
@@ -167,9 +125,30 @@ public class MainActivity extends AppCompatActivity {
                         new LinearLayoutManager(context,LinearLayoutManager.HORIZONTAL,false));
 
                 mRecyclerViewTop.setHasFixedSize(true);
-                //mRecyclerViewTop.addOnScrollListener(scrollListener);
 
-                SnapHelper mSnapHelperTop = new PagerSnapHelper();
+
+                //--Можно два экземпляра, чтобы понятно было, какой ресайклер меняется
+                //--А можно попытаться через определения ресайклера, к которому attach
+                //----
+                //--Problem--Ложные срабатывания - подёргивания, но не полные сдвиги +
+                //+ Сама вью почему-то не обновляется для изменения курса при изменении валюты другой вью
+                SnapHelper mSnapHelperTop = new PagerSnapHelper() {
+                    @Override
+                    public boolean onFling (int velocityX, int velocityY){
+
+                        Log.d(CurrencyList.TAG,"MainActivity: SnapHelper.onFling" +
+                                " velocityX- " + velocityX + " ; velocityY- " + velocityY);
+
+                        if(velocityX > 0) mCurList.changeCurrentlyExchange(mRecyclerViewTop, 1);
+                        else mCurList.changeCurrentlyExchange(mRecyclerViewTop, -1);
+
+                        mRecyclerViewBottom.getAdapter().notifyDataSetChanged();
+                        mRecyclerViewTop.getAdapter().notifyDataSetChanged();
+
+
+                        return super.onFling(velocityX, velocityY);
+                    }
+                };
                 mSnapHelperTop.attachToRecyclerView(mRecyclerViewTop);
 
                 //---Second recycler------
@@ -179,12 +158,13 @@ public class MainActivity extends AppCompatActivity {
                         new LinearLayoutManager(context,LinearLayoutManager.HORIZONTAL,false));
 
                 mRecyclerViewBottom.setHasFixedSize(true);
-                //mRecyclerViewBottom.addOnScrollListener(scrollListener);
 
                 SnapHelper mSnapHelperBottom = new PagerSnapHelper();
                 mSnapHelperBottom.attachToRecyclerView(mRecyclerViewBottom);
 
                 //----------------------------
+
+                service.loadData();
 
             }
 

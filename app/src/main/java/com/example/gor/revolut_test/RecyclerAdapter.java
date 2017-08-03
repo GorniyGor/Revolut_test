@@ -68,35 +68,20 @@ class RecyclerAdapter extends RecyclerView.Adapter<SimpleViewHolder>{
 
         //-Problem-- Не успели скачаться все данные
         String ownCurrencyName = mCurList.getCurrencyName(position);
+        double rate = 0.0;
 
         if(/*service != null &&*/ ownCurrencyName != null) {
 
             String currencyTo = mCurList.getCurrencyFrom(name);
 
             //--Из-за race condition адаптера и окончания закачки--
-            if(currencyTo!=null) {
-                double rate = mCurList.getRate(currencyTo);
-
-                //--Для информированности другой вью, какая мы сейчас валюта.
-                //---может можно было использовать интерфейс для этой цели---
-                //-Optimization-- А ещё зачем передавать ownCurrencyName туда, откуда мы его взяли? (риторический)
-                //-Problem-- Вью не обновляется при смене вьюшкой валюты
-                /*mCurList.setCurrentlyExchange(mParent, ownCurrencyName);*/
-
-                holder.setCurrancyName(ownCurrencyName);
-                //-Error--Ошибка потому что на данном этапе не добавлена вторая валюта в currentExchange.
-                //-Solution--Может быть нужно изначально его дефолтом заполнить -- Done, но не очень (просто присволи строку)
-
-                holder.setCurrancyRate(rate);
-
-                /*checkRates.set(position, rate);
-                mNotifyRecyclerChanged.onNotify();*/
-            }
-
-
-
+            if(currencyTo!=null) rate = mCurList.getRate(currencyTo);
 
         }
+        else ownCurrencyName = "non";
+
+        holder.setCurrancyName(ownCurrencyName);
+        holder.setCurrancyRate(rate);
     }
 
     @Override

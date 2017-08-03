@@ -68,9 +68,17 @@ public class CurrencyList {
 
     //---Необходимо для понимания, какие именно валюты в ланный момент нужно обменивать
     //---А для этого нужно понимать, какая валюта стоит в другой вьюшке
+    public void changeCurrentlyExchange(RecyclerView name, Integer mod){
+        int currency = currentlyExchange.get(name);
+        if(mod < 0 && currency == 0) return;
+        if(mod > 0 && currency == 2) return;
+        currentlyExchange.put(name, currency + mod);
+    }
+
     public void setCurrentlyExchange(RecyclerView name, Integer currency){
         currentlyExchange.put(name, currency);
     }
+
     public int getCurrentlyExchangeSize(){return currentlyExchange.size();}
 
     //---В структуре currentlyExchange должно быть только 2 элемента,

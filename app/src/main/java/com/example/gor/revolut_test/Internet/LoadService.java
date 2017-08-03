@@ -35,12 +35,12 @@ public class LoadService extends Service{
     public IBinder onBind(Intent intent) {
         Log.d(CurrencyList.TAG,"LoadService: onBind " );
         mDataSource = new DataLoader(mLoadedListener);
-        mDataSource.toLoadData();
         return mBinder;
     }
 
     public void setNotifyListener(NotifyListener mNotifyListener) {
         this.mNotifyListener = mNotifyListener;
+        Log.d(CurrencyList.TAG,"LoadService.setNotifyListener: it is " + mNotifyListener.toString());
     }
 
     public void loadData(){
