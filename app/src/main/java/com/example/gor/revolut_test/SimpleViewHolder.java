@@ -22,5 +22,5 @@ class SimpleViewHolder extends RecyclerView.ViewHolder {
 
     public void setCurrancyName(String currancyNameString){ currancyName.setText(currancyNameString); }
     public void setCurrancyRate(double currancyRateNumber){
-        currancyRate.setText("1? = *" + currancyRateNumber); }
+        currancyRate.setText("1 = *" + currancyRateNumber); }
 }

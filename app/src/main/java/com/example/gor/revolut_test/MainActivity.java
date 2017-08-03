@@ -20,6 +20,7 @@ import com.example.gor.revolut_test.Internet.LoadService;
 public class MainActivity extends AppCompatActivity {
 
     public final static String BR_ACTION = "com.example.gor.revolut_test";
+    public final static String UPDATE_ACTION = "update data into recycler";
 
     private LoadService service;
     private ServiceConnection serviceConnection;
@@ -80,6 +81,8 @@ public class MainActivity extends AppCompatActivity {
 
             if(intent.getAction().equals(BR_ACTION)) {
 
+                registerReceiver(new DataUpdateBroadcastReceiver(), new IntentFilter(UPDATE_ACTION));
+
                 //--Вызывается когда произошла закачка данных из сети--
                 LoadService.NotifyListener mNotifyListener = new LoadService.NotifyListener() {
                     @Override
@@ -92,10 +95,11 @@ public class MainActivity extends AppCompatActivity {
 
                         //--Problem--Почему то не меняется вид сразу после вызова.
                         // Остаётся, что бы ло нарисовано в xml. После какого-либо действия одновляется в норму
-                        //--maybeSolution--В onBindViewHolder выставлять дефлтные значения при null данных.--не прокатило
+                        //--Solution--Делаем разнесенные вызовы с помощью бродкаст
                         Log.d(CurrencyList.TAG,"MainActivity: NotifyListener.onNotify setCurrentlyExchange" );
-                        mRecyclerViewTop.getAdapter().notifyDataSetChanged();
-                        mRecyclerViewBottom.getAdapter().notifyDataSetChanged();
+
+                        sendBroadcast(new Intent().setAction(UPDATE_ACTION));
+
                     }
                 };
                 service.setNotifyListener(mNotifyListener);
@@ -105,7 +109,7 @@ public class MainActivity extends AppCompatActivity {
                 mRecyclerViewTop = (RecyclerView) findViewById(R.id.id_recycler_top);
                 mRecyclerViewBottom = (RecyclerView) findViewById(R.id.id_recycler_bottom);
 
-                //--Нужно для понимания каждым ресайклером, какая валюта в данный момент отображена в другом--
+                //--Нужно для понимания каждым ресайклером, какая валюта в данный момент отображена в другом
                 //--скорее даже не нужно, т.к. можно в SnapHelper и onNotify просто свои id передавать
                 CurrencyList.RV_NAMES.put(idRecyclerTop, mRecyclerViewTop);
                 CurrencyList.RV_NAMES.put(idRecyclerBottom, mRecyclerViewBottom);
@@ -130,20 +134,24 @@ public class MainActivity extends AppCompatActivity {
                 //--Можно два экземпляра, чтобы понятно было, какой ресайклер меняется
                 //--А можно попытаться через определения ресайклера, к которому attach
                 //----
-                //--Problem--Ложные срабатывания - подёргивания, но не полные сдвиги +
-                //+ Сама вью почему-то не обновляется для изменения курса при изменении валюты другой вью
+                //--Problem--1)Ложные срабатывания - подёргивания, но не полные сдвиги +
+                //+ 2)Сама вью почему-то не обновляется для изменения курса при изменении валюты другой вью
+                //  2)На самом деле, просто рано вызывались обновления экрана
+                //--Solution 2)--Делаем разнесенные вызовы с помощью бродкаст
                 SnapHelper mSnapHelperTop = new PagerSnapHelper() {
                     @Override
                     public boolean onFling (int velocityX, int velocityY){
 
                         Log.d(CurrencyList.TAG,"MainActivity: SnapHelper.onFling" +
-                                " velocityX- " + velocityX + " ; velocityY- " + velocityY);
+                                " velocityX- " + velocityX + " ; ScrollDistance- " + calculateScrollDistance(velocityX, velocityY)[0]);
 
                         if(velocityX > 0) mCurList.changeCurrentlyExchange(mRecyclerViewTop, 1);
                         else mCurList.changeCurrentlyExchange(mRecyclerViewTop, -1);
-
-                        mRecyclerViewBottom.getAdapter().notifyDataSetChanged();
-                        mRecyclerViewTop.getAdapter().notifyDataSetChanged();
+                        //Может быть между этими действиями маленькая пауза, они идут как одно,
+                        // а не последовательно
+                        /*mRecyclerViewBottom.getAdapter().notifyDataSetChanged();
+                        mRecyclerViewTop.getAdapter().notifyDataSetChanged();*/
+                        sendBroadcast(new Intent().setAction(UPDATE_ACTION));
 
 
                         return super.onFling(velocityX, velocityY);
@@ -159,7 +167,20 @@ public class MainActivity extends AppCompatActivity {
 
                 mRecyclerViewBottom.setHasFixedSize(true);
 
-                SnapHelper mSnapHelperBottom = new PagerSnapHelper();
+                SnapHelper mSnapHelperBottom = new PagerSnapHelper(){
+                    @Override
+                    public boolean onFling (int velocityX, int velocityY){
+
+                        Log.d(CurrencyList.TAG,"MainActivity: SnapHelper.onFling" +
+                                " velocityX- " + velocityX + " ; ScrollDistance- " + calculateScrollDistance(velocityX, velocityY)[0]);
+
+                        if(velocityX > 0) mCurList.changeCurrentlyExchange(mRecyclerViewBottom, 1);
+                        else mCurList.changeCurrentlyExchange(mRecyclerViewBottom, -1);
+                        sendBroadcast(new Intent().setAction(UPDATE_ACTION));
+
+                        return super.onFling(velocityX, velocityY);
+                    }
+                };
                 mSnapHelperBottom.attachToRecyclerView(mRecyclerViewBottom);
 
                 //----------------------------
@@ -169,7 +190,22 @@ public class MainActivity extends AppCompatActivity {
             }
 
         }
+
+        //--Для обновления курсов на экране при смене валют.
+        //Бродкаст нужен, чтобы изменения данных успевали происходить в системе,
+        //т.е. просто для разнесенных по времени вызовов
+        public class DataUpdateBroadcastReceiver extends BroadcastReceiver{
+
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Log.d(CurrencyList.TAG,"MainActivity: DataUpdateBroadcastReceiver.onReceive UUUUUUUUUUPDATE DDDDDDATA" );
+                mRecyclerViewTop.getAdapter().notifyDataSetChanged();
+                mRecyclerViewBottom.getAdapter().notifyDataSetChanged();
+            }
+        }
     }
+
+
 
 
 }

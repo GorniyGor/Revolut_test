@@ -86,12 +86,12 @@ public class CurrencyList {
     //---Нам нужно взять название валюты у другой (не собственной) вьюшки
     public String getCurrencyFrom(String  name){
 
-        Log.d(TAG, "getCurrencyFrom: RecyclerView " + name + " = " + RV_NAMES.get(name).toString());
+        /*Log.d(TAG, "getCurrencyFrom: RecyclerView " + name + " = " + RV_NAMES.get(name).toString());*/
         RecyclerView currency = RV_NAMES.get(name);
 
         if(currentlyExchange.size() > 2) Log.d(TAG, "getCurrencyFrom: ViewGroup parents too many!");
 
-        Log.d(TAG, "getCurrencyFrom: currentlyExchange is empty? - " + currentlyExchange.isEmpty());
+        /*Log.d(TAG, "getCurrencyFrom: currentlyExchange is empty? - " + currentlyExchange.isEmpty());*/
         for(Map.Entry entry : currentlyExchange.entrySet()){
             Log.d(TAG, "getCurrencyFrom: currentlyExchange " + entry.getKey() + " = " + entry.getValue());
             if(!currency.equals(entry.getKey())){
