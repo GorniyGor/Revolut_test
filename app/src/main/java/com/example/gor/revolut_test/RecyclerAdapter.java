@@ -20,8 +20,9 @@ class RecyclerAdapter extends RecyclerView.Adapter<SimpleViewHolder>{
     private String name;
 
     /*//--Для предотвращения зацикливания из-за нотификации другого ресайклера
-    private ArrayList<Double> checkRates = new ArrayList<>();
-    private NotifyRecyclerChanged mNotifyRecyclerChanged;*/
+    private ArrayList<Double> checkRates = new ArrayList<>();*/
+
+    private NotifyCashChanged mNotifyCashChanged;
 
     //-----------------------
 
@@ -55,8 +56,14 @@ class RecyclerAdapter extends RecyclerView.Adapter<SimpleViewHolder>{
         if(inflater != null){
             /*mParent = parent;*/
             /*name = (RecyclerView) parent;*/
-
-            return new SimpleViewHolder(inflater.inflate(R.layout.recycler_view, parent, false));
+            SimpleViewHolder svh = new SimpleViewHolder(inflater.inflate(R.layout.recycler_view, parent, false));
+            svh.setCashChangedNotify(new SimpleViewHolder.CashChangedNotify() {
+                @Override
+                public void onNotify(double cash) {
+                    mNotifyCashChanged.onNotify(cash);
+                }
+            });
+            return svh;
         }
         else {
             throw new  RuntimeException("Oooops, looks like activity is dead");
@@ -69,19 +76,24 @@ class RecyclerAdapter extends RecyclerView.Adapter<SimpleViewHolder>{
         //-Problem-- Не успели скачаться все данные
         String ownCurrencyName = mCurList.getCurrencyName(position);
         double rate = 0.0;
+        double cash = 0;
 
         if(/*service != null &&*/ ownCurrencyName != null) {
 
             String currencyTo = mCurList.getCurrencyFrom(name);
 
             //--Из-за race condition адаптера и окончания закачки--
-            if(currencyTo!=null) rate = mCurList.getRate(currencyTo);
+            if(currencyTo!=null){
+                rate = mCurList.getRate(currencyTo);
+                cash = mCurList.getCashToExchange(name);
+            }
 
         }
         else ownCurrencyName = "non";
 
         holder.setCurrancyName(ownCurrencyName);
         holder.setCurrancyRate(rate);
+        holder.setCashAmount(cash*rate);
     }
 
     @Override
@@ -89,7 +101,13 @@ class RecyclerAdapter extends RecyclerView.Adapter<SimpleViewHolder>{
         return 3;
     }
 
-    /*public interface NotifyRecyclerChanged {
-        void onNotify();
-    }*/
+    //----Addition----
+
+    public void setNotifyCashChanged(NotifyCashChanged notifyCashChanged){
+        mNotifyCashChanged = notifyCashChanged;
+    }
+
+    public interface NotifyCashChanged {
+        void onNotify(double cash);
+    }
 }
