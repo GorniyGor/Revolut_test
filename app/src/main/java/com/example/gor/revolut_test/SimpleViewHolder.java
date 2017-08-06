@@ -3,6 +3,7 @@ package com.example.gor.revolut_test;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -42,13 +43,14 @@ class SimpleViewHolder extends RecyclerView.ViewHolder {
             @Override
             public void afterTextChanged(Editable s) {
 
-                /*Log.d(CurrencyList.TAG,"TextChangedListener.afterTextChanged: " + s.toString() +
-                "touch event: " + cashAmount.didTouchFocusSelect());*/
+                Log.d(CurrencyList.TAG,"TextChangedListener.afterTextChanged: " + s.toString() +
+                "touch event: " + cashAmount.didTouchFocusSelect());
                 if(cashAmount.didTouchFocusSelect() && !s.toString().equals("")) {
                     Double cash = Double.valueOf(s.toString());
                     if ( cash != 0){
                         //CurrencyList.getInstance().setCashToExchange(cash);
-                        mCashChangedNotify.onNotify(cash);// Через MainActivity ментается (проброс туда черехз адаптер)
+                        // Через MainActivity ментается (проброс туда через адаптер)
+                        mCashChangedNotify.onNotify(cash);
                     }
                 }
                 //--Нужно добавить обновления другого ресайклера, но
@@ -70,7 +72,9 @@ class SimpleViewHolder extends RecyclerView.ViewHolder {
         /*this.currancyRateNamber = currancyRateNumber;*/
         currancyRate.setText("1 = * " + currancyRateNumber); }
     //--Нужен литенер editText
-    public void setCashAmount(Double cashAmountNumber){ cashAmount.setText(cashAmountNumber.toString()); }
+    public void setCashAmount(Double cashAmountNumber){
+        if(cashAmountNumber == 0) cashAmount.setText("");
+        else cashAmount.setText(cashAmountNumber.toString()); }
 
     //--Addition----------
     //--Для перевода числа с одной валюты на другую---

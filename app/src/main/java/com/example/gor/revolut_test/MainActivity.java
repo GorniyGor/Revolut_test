@@ -95,11 +95,22 @@ public class MainActivity extends AppCompatActivity {
                 registerReceiver(new DataUpdateBroadcastReceiver(), new IntentFilter(UPDATE_ACTION));
 
             //--Для обновления ресайклера, когда ввели сумму, которую нужно перевести
-            //--Problem--Когда происходит скачивание новой партии данных - эдитор обнуляется! - не всегда
-            //--maybeProblem--При изменении валюты, в которую переводят, обнуляется исходная. - просто не как в Revolut
 
-            //--Problem--Ситауция, когда в обоих ресайклерах есть ненулевой cash, как обрабатывается это?
-            //--Problem--Бывает неправильное обновление курсов!
+            //--maybeProblem--При изменении валюты, в которую переводят, обнуляется исходная.
+            // - Не всегда
+
+            //--Problem--При скачивани новых данных обнуляется вводимое число.
+
+            //--additionProblem--Бывает неправильное обновление курсов!
+            // - Из-за непонимания жестов: свайп и скролл(ошибка)
+            // Нужно попробовать обнулять в какой-то момент,
+            // но тогда при скачивании новой партии будет обнуление
+
+            //--MainProblem--При прокручивании вью вью становится исходной, и значение меняется в неподвижной!
+            //-Solution--Нужно сделать главную валюту и меняющуюся: главная - неподвижнаю.
+            // Или просто за раз обновлять одно поле -эдитор- у вью?
+            // Нужно сделать главным (у кого не будет cash домножаться на курс) последнего вводимого.
+            // Ну и cash должен быть одним для обоих (может пропадёт зацикленность)
             mCurList.setDataChangedListener(new CurrencyList.DataChangedListener() {
                 @Override
                 public void onNotify(String adapterName) {
@@ -108,8 +119,9 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
-            mCurList.initCashToExchange(idRecyclerTop);
-            mCurList.initCashToExchange(idRecyclerBottom);
+            //--Нет надобности т.к. переделали систему с cash
+           /* mCurList.initCashToExchange(idRecyclerTop);
+            mCurList.initCashToExchange(idRecyclerBottom);*/
 
                 //--Вызывается когда произошла закачка данных из сети--
                 LoadService.NotifyListener mNotifyListener = new LoadService.NotifyListener() {
@@ -158,6 +170,8 @@ public class MainActivity extends AppCompatActivity {
                         new LinearLayoutManager(context,LinearLayoutManager.HORIZONTAL,false));
 
                 mRecyclerViewTop.setHasFixedSize(true);
+            /*//--Хотел отключить скролл, но отключил всё передвижение
+            mRecyclerViewTop.setLayoutFrozen(true);*/
 
 
                 //--Можно два экземпляра, чтобы понятно было, какой ресайклер меняется
@@ -169,21 +183,24 @@ public class MainActivity extends AppCompatActivity {
                 //--Solution 2)--Делаем разнесенные вызовы с помощью бродкаст - плохое решение
 
 
+            //--Problem--Вообще не реагирует на медленные действия
                 SnapHelper mSnapHelperTop = new PagerSnapHelper() {
                     @Override
                     public boolean onFling (int velocityX, int velocityY){
 
-                        Log.d(CurrencyList.TAG,"MainActivity: SnapHelper.onFling" +
-                                " velocityX- " + velocityX + " ; ScrollDistance- " + calculateScrollDistance(velocityX, velocityY)[0]);
+                        Log.d(CurrencyList.TAG,"MainActivity: SnapHelper.onFling TOP" +
+                                " velocityX- " + velocityX + " ; ScrollDistance- " +
+                                calculateScrollDistance(velocityX, velocityY)[0]);
 
                         if(velocityX > 0) mCurList.changeCurrentlyExchange(mRecyclerViewTop, 1);
                         else mCurList.changeCurrentlyExchange(mRecyclerViewTop, -1);
-                        //Может быть между этими действиями маленькая пауза, они идут как одно,
-                        // а не последовательно
-                        /*mRecyclerViewBottom.getAdapter().notifyDataSetChanged();
-                        mRecyclerViewTop.getAdapter().notifyDataSetChanged();*/
+                        // Добавляем обнуление cash при свайпе,
+                        // если данным ресайклером последнее значение и было установлено
+                        if(mCurList.mCash.getChanger().equals(idRecyclerTop)){
+                            mCurList.mCash.set("", "", 0);
+                        }
                         sendBroadcast(new Intent().setAction(UPDATE_ACTION).
-                                putExtra("adapter", "both"));
+                                putExtra("adapter", "BOTTOM"));
 
 
                         return super.onFling(velocityX, velocityY);
@@ -194,8 +211,9 @@ public class MainActivity extends AppCompatActivity {
             //--Для обновления ресайклера, когда ввели сумму, которую нужно перевести
             mRecyclerAdapterTop.setNotifyCashChanged(new RecyclerAdapter.NotifyCashChanged() {
                 @Override
-                public void onNotify(double cash) {
-                    mCurList.setCashToExchange(cash, idRecyclerTop);
+                public void onNotify(String currencyName, double cash) {
+                    /*mCurList.setCashToExchange(cash, idRecyclerTop);*/
+                    mCurList.mCash.set( idRecyclerTop, currencyName, cash);
                 }
             });
 
@@ -211,13 +229,20 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public boolean onFling (int velocityX, int velocityY){
 
-                        Log.d(CurrencyList.TAG,"MainActivity: SnapHelper.onFling" +
-                                " velocityX- " + velocityX + " ; ScrollDistance- " + calculateScrollDistance(velocityX, velocityY)[0]);
+                        Log.d(CurrencyList.TAG,"MainActivity: SnapHelper.onFling BOTTOM" +
+                                " velocityX- " + velocityX + " ; ScrollDistance- " +
+                                calculateScrollDistance(velocityX, velocityY)[0]);
 
                         if(velocityX > 0) mCurList.changeCurrentlyExchange(mRecyclerViewBottom, 1);
                         else mCurList.changeCurrentlyExchange(mRecyclerViewBottom, -1);
+                        // Добавляем обнуление cash при свайпе,
+                        // если данным ресайклером последнее значение и было установлено
+                        if(mCurList.mCash.getChanger().equals(idRecyclerBottom)){
+                            mCurList.mCash.set("", "", 0);
+                        }
+
                         sendBroadcast(new Intent().setAction(UPDATE_ACTION).
-                                putExtra("adapter", "both"));
+                                putExtra("adapter", "TOP"));
 
                         return super.onFling(velocityX, velocityY);
                     }
@@ -227,8 +252,9 @@ public class MainActivity extends AppCompatActivity {
             //--Для обновления ресайклера, когда ввели сумму, которую нужно перевести
             mRecyclerAdapterBottom.setNotifyCashChanged(new RecyclerAdapter.NotifyCashChanged() {
                 @Override
-                public void onNotify(double cash) {
-                    mCurList.setCashToExchange(cash, idRecyclerBottom);
+                public void onNotify(String currencyName, double cash) {
+                    /*mCurList.setCashToExchange(cash, idRecyclerBottom);*/
+                    mCurList.mCash.set( idRecyclerBottom, currencyName, cash);
                 }
             });
 

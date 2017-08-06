@@ -5,7 +5,14 @@
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context="com.example.gor.revolut_test.MainActivity">
+        tools:context="com.example.gor.revolut_test.MainActivity"
+    android:paddingRight="30sp"
+    android:paddingLeft="30sp"
+    android:paddingTop="10sp"
+    android:paddingBottom="10sp"
+
+    android:focusable="true"
+    android:focusableInTouchMode="true">
 
         <EditText
             android:id="@+id/id_edit_exchange_number"

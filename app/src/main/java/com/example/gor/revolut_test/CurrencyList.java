@@ -23,14 +23,14 @@ public class CurrencyList {
     public static volatile CurrencyList sSelf;
     private DataChangedListener mDataChangedListener;
     private HashMap<RecyclerView, Integer>  currentlyExchange = new HashMap<>();
-    private String otherCurrency; //---Нужно для метода getCurrencyFrom
+    private String otherCurrency = null; //---Нужно для метода getCurrencyFrom
 
     private HashMap<String, CurrencyClass> exchangeRate = new HashMap<>();
     private ArrayList<String> positionOfCurrency = new ArrayList<>(); //--Optimization--Вместо него можно FX_URL ArrayList
-    private String currentCurrencyFrom;
-    private HashMap<String, Double> cashToExchange = new HashMap<>(); //--Количество денег, которое хотят перевести в другую валюту
+    private String currentCurrencyFrom = null;
+    //--Количество денег, которое хотят перевести в другую валюту
+    public Cash mCash = new Cash();
 
-    //--Нужно выстваить листенер, который будет обновлять данные через активити
 
     public static CurrencyList getInstance(){
         if(sSelf == null){
@@ -55,9 +55,9 @@ public class CurrencyList {
         positionOfCurrency.add(nameFrom);
     }
 
-    public double getRate(String currencyTo){
-        if(currencyTo != currentCurrencyFrom) {
-            return exchangeRate.get(currentCurrencyFrom).getRate(currencyTo);
+    public double getRate(String currencyFrom, String currencyTo){
+        if(currencyTo != currencyFrom) {
+            return exchangeRate.get(currencyFrom).getRate(currencyTo);
         }
         else return 1;
     }
@@ -71,9 +71,19 @@ public class CurrencyList {
         return null;
     }
 
+    /*public double getRateAnother() {
+        double rate = 0;
+        if(currentCurrencyFrom != null && otherCurrency != null) {
+            if(currentCurrencyFrom.equals(otherCurrency)) rate = 1;
+            else rate = exchangeRate.get(otherCurrency).getRate(currentCurrencyFrom);
+        }
+        return rate;
+    }*/
+
     //-----------------------------------------------------
 
-    public void initCashToExchange(String name) {cashToExchange.put(name, (double)0);}
+    //--Нет надобности т.к. переделали систему с cash
+    /*public void initCashToExchange(String name) {cashToExchange.put(name, (double)0);}
 
     public double getCashToExchange(String name){
         if(cashToExchange.size() < 2){ // Инициализация
@@ -105,7 +115,7 @@ public class CurrencyList {
                 }
             }
         }
-    }
+    }*/
 
 
     //----Для взаимодействия между вью (валютами)---------------------------------------------------
@@ -146,8 +156,29 @@ public class CurrencyList {
     }
 
     //--Для обновления данных
-
     public interface DataChangedListener{
         void onNotify(String adapterName);
+    }
+
+    //--Problem--При исходном верхнем ресайклере: при записи числа низ не обновляется(?),
+    // но как только подгружаются данные - перевод выполняется.
+    //--Зануление при скролле любого вью
+    //--При исзодном нижнем ресайклере ситуация похожая,
+    // но обновляется при скачивании с каким-то багом (возможно показалось) - число в эдиторе не введенное,
+    // а близкое к ниму(мб совпадение)
+    public class Cash{
+        private double cashToExchange = 0; //--Sum that had been entered in EditView
+        private String changerId = ""; //--RecyclerView which had been done it
+        private String versionChengerId = ""; //--Currency which had been done it
+
+        public void set(String id, String vId, double sum){
+            changerId = id;
+            versionChengerId = vId;
+            cashToExchange = sum;
+        }
+
+        public String getChanger(){ return changerId; }
+        public String getVersionOfChanger() { return versionChengerId; }
+        public double getCash(){ return cashToExchange; }
     }
 }
