@@ -38,8 +38,8 @@ class SimpleViewHolder extends RecyclerView.ViewHolder {
             public void afterTextChanged(Editable s) {
 
                 Log.d(CurrencyList.TAG,"TextChangedListener.afterTextChanged: " + s.toString() +
-                "touch event: " + cashAmount.didTouchFocusSelect());
-                if(cashAmount.didTouchFocusSelect() && !s.toString().equals("")) {
+                "touch event: " + cashAmount.isFocused());
+                if(cashAmount.isFocused() && !s.toString().equals("")) {
                     Double cash = Double.valueOf(s.toString());
                     if ( cash != 0){
                         // Через MainActivity ментается (проброс туда через адаптер)
@@ -62,7 +62,7 @@ class SimpleViewHolder extends RecyclerView.ViewHolder {
         else cashAmount.setText(cashAmountNumber.toString()); }
 
     //--Addition----------
-    //--Для перевода введенного числа из одной валюты в другую---
+    //--Для перевода числа с одной валюты на другую---
 
     public void setCashChangedNotify(CashChangedNotify cashChangedNotify){
         mCashChangedNotify = cashChangedNotify;

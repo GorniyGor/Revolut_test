@@ -9,10 +9,7 @@
     android:paddingRight="30sp"
     android:paddingLeft="30sp"
     android:paddingTop="10sp"
-    android:paddingBottom="10sp"
-
-    android:focusable="true"
-    android:focusableInTouchMode="true">
+    android:paddingBottom="10sp">
 
         <EditText
             android:id="@+id/id_edit_exchange_number"
@@ -26,7 +23,9 @@
             android:background="#ffffff"
 
             android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true" />
+            android:layout_alignParentRight="true"
+
+            android:focusableInTouchMode="true"/>
 
 
         <TextView
