@@ -38,11 +38,6 @@ public class LoadService extends Service{
         return mBinder;
     }
 
-    public void setNotifyListener(NotifyListener mNotifyListener) {
-        this.mNotifyListener = mNotifyListener;
-        Log.d(CurrencyList.TAG,"LoadService.setNotifyListener: it is " + mNotifyListener.toString());
-    }
-
     public void loadData(){
         mDataSource.toLoadData();
     }
@@ -51,6 +46,14 @@ public class LoadService extends Service{
         public LoadService getService() {
             return LoadService.this;
         }
+    }
+
+
+    //--Addition-------
+
+    public void setNotifyListener(NotifyListener mNotifyListener) {
+        this.mNotifyListener = mNotifyListener;
+        Log.d(CurrencyList.TAG,"LoadService.setNotifyListener: it is " + mNotifyListener.toString());
     }
 
     public interface NotifyListener{

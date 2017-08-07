@@ -16,7 +16,6 @@ import android.support.v7.widget.PagerSnapHelper;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SnapHelper;
 import android.util.Log;
-import android.widget.EditText;
 
 import com.example.gor.revolut_test.Internet.LoadService;
 
@@ -24,13 +23,11 @@ public class MainActivity extends AppCompatActivity {
 
     public final static String BR_ACTION = "com.example.gor.revolut_test";
     public final static String UPDATE_ACTION = "update data into recycler";
-    public final static String LOAD_ACTION = "com.example.gor.revolut_test_load_data";
 
     private LoadService service;
     private ServiceConnection serviceConnection;
     private RecyclerBroadcastReceiver broadcastReceiver = new RecyclerBroadcastReceiver();
 
-    private EditText editCashAmountView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,11 +36,11 @@ public class MainActivity extends AppCompatActivity {
 
         registerReceiver(broadcastReceiver, new IntentFilter(BR_ACTION));
 
-
- /*       Toolbar mToolbar = (Toolbar) findViewById(R.id.id_toolbar_fx);
+ /*     // может на будущее
+        Toolbar mToolbar = (Toolbar) findViewById(R.id.id_toolbar_fx);
         setSupportActionBar(mToolbar);*/
 
-        //--Service----------------------------------
+        //--Service initialization----------------------------------
         serviceConnection = new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName name, IBinder binder) {
@@ -66,17 +63,6 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-        AlarmManager alarmManagerCancled = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
-        alarmManagerCancled.cancel(PendingIntent.getBroadcast(this, 0,
-                new Intent(this, LoadBroadcastReceiver.class), 0));
-        unbindService(serviceConnection);/*
-        unregisterReceiver(new RecyclerBroadcastReceiver.DataUpdateBroadcastReceiver());*/
-        unregisterReceiver(broadcastReceiver);
-    }
-
     public class RecyclerBroadcastReceiver extends BroadcastReceiver {
         private static final String idRecyclerTop = "TOP";
         private static final String idRecyclerBottom = "BOTTOM";
@@ -94,23 +80,10 @@ public class MainActivity extends AppCompatActivity {
 
                 registerReceiver(new DataUpdateBroadcastReceiver(), new IntentFilter(UPDATE_ACTION));
 
-            //--Для обновления ресайклера, когда ввели сумму, которую нужно перевести
-
-            //--maybeProblem--При изменении валюты, в которую переводят, обнуляется исходная.
-            // - Не всегда
-
-            //--Problem--При скачивани новых данных обнуляется вводимое число.
-
-            //--additionProblem--Бывает неправильное обновление курсов!
-            // - Из-за непонимания жестов: свайп и скролл(ошибка)
-            // Нужно попробовать обнулять в какой-то момент,
-            // но тогда при скачивании новой партии будет обнуление
-
-            //--MainProblem--При прокручивании вью вью становится исходной, и значение меняется в неподвижной!
-            //-Solution--Нужно сделать главную валюту и меняющуюся: главная - неподвижнаю.
-            // Или просто за раз обновлять одно поле -эдитор- у вью?
-            // Нужно сделать главным (у кого не будет cash домножаться на курс) последнего вводимого.
-            // Ну и cash должен быть одним для обоих (может пропадёт зацикленность)
+            //--Для обновления ресайклера, когда ввели сумму, которую нужно перевести-------
+            //--НЕ ИСПОЛЬЗУЕТСЯ!
+                //--additionProblem--Бывает неправильное обновление курсов!
+                // - Из-за непонимания жестов: свайп и скролл
             mCurList.setDataChangedListener(new CurrencyList.DataChangedListener() {
                 @Override
                 public void onNotify(String adapterName) {
@@ -119,11 +92,8 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
-            //--Нет надобности т.к. переделали систему с cash
-           /* mCurList.initCashToExchange(idRecyclerTop);
-            mCurList.initCashToExchange(idRecyclerBottom);*/
 
-                //--Вызывается когда произошла закачка данных из сети--
+                //--Вызывается когда произошла закачка данных из сети-----
                 LoadService.NotifyListener mNotifyListener = new LoadService.NotifyListener() {
                     @Override
                     public void onNotify() {
@@ -133,9 +103,6 @@ public class MainActivity extends AppCompatActivity {
 
                         }
 
-                        //--Problem--Почему то не меняется вид сразу после вызова.
-                        // Остаётся, что бы ло нарисовано в xml. После какого-либо действия одновляется в норму
-                        //--Solution--Делаем разнесенные вызовы с помощью бродкаст - плохое решение
                         Log.d(CurrencyList.TAG,"MainActivity: NotifyListener.onNotify setCurrentlyExchange" );
 
                         sendBroadcast(new Intent().setAction(UPDATE_ACTION).
@@ -145,13 +112,16 @@ public class MainActivity extends AppCompatActivity {
                 };
                 service.setNotifyListener(mNotifyListener);
 
-                //----------------------------------------------------------------------------------
+            //--------------------------------------------------------------------------------------
 
                 mRecyclerViewTop = (RecyclerView) findViewById(R.id.id_recycler_top);
                 mRecyclerViewBottom = (RecyclerView) findViewById(R.id.id_recycler_bottom);
 
-                //--Нужно для понимания каждым ресайклером, какая валюта в данный момент отображена в другом
-                //--скорее даже не нужно, т.к. можно в SnapHelper и onNotify просто свои id передавать
+                //--Нужно для понимания каждым ресайклером,
+                // какая валюта в данный момент отображена в другом---
+
+                //--optimization--скорее даже не нужно,
+                // т.к. можно в SnapHelper и onNotify просто свои id передавать
                 CurrencyList.RV_NAMES.put(idRecyclerTop, mRecyclerViewTop);
                 CurrencyList.RV_NAMES.put(idRecyclerBottom, mRecyclerViewBottom);
 
@@ -163,27 +133,20 @@ public class MainActivity extends AppCompatActivity {
                         new RecyclerAdapter(getLayoutInflater(), idRecyclerBottom );
 
 
-                //---First recycler------
+                //---First recycler---------------------------
 
                 mRecyclerViewTop.setAdapter(mRecyclerAdapterTop);
                 mRecyclerViewTop.setLayoutManager(
                         new LinearLayoutManager(context,LinearLayoutManager.HORIZONTAL,false));
 
                 mRecyclerViewTop.setHasFixedSize(true);
-            /*//--Хотел отключить скролл, но отключил всё передвижение
+            /*//--Хотел отключить скролл (для избавления от ложных срабатываний),
+            // но отключил всё передвижение
             mRecyclerViewTop.setLayoutFrozen(true);*/
 
+            //--Для реализации свайпа, а не простого скролла вью-----
 
-                //--Можно два экземпляра, чтобы понятно было, какой ресайклер меняется
-                //--А можно попытаться через определения ресайклера, к которому attach
-                //----
-                //--Problem--1)Ложные срабатывания - подёргивания, но не полные сдвиги +
-                //+ 2)Сама вью почему-то не обновляется для изменения курса при изменении валюты другой вью
-                //  2)На самом деле, просто рано вызывались обновления экрана
-                //--Solution 2)--Делаем разнесенные вызовы с помощью бродкаст - плохое решение
-
-
-            //--Problem--Вообще не реагирует на медленные действия
+                //--Problem--Ложные срабатывания - подёргивания, но не полные сдвиги
                 SnapHelper mSnapHelperTop = new PagerSnapHelper() {
                     @Override
                     public boolean onFling (int velocityX, int velocityY){
@@ -192,15 +155,20 @@ public class MainActivity extends AppCompatActivity {
                                 " velocityX- " + velocityX + " ; ScrollDistance- " +
                                 calculateScrollDistance(velocityX, velocityY)[0]);
 
+                        // Для понимания, какую валюту показывать при свайпе
                         if(velocityX > 0) mCurList.changeCurrentlyExchange(mRecyclerViewTop, 1);
                         else mCurList.changeCurrentlyExchange(mRecyclerViewTop, -1);
+
                         // Добавляем обнуление cash при свайпе,
                         // если данным ресайклером последнее значение и было установлено
                         if(mCurList.mCash.getChanger().equals(idRecyclerTop)){
+                            Log.d(CurrencyList.TAG,"MainActivity.onFling: TOP CLEARNING");
                             mCurList.mCash.set("", "", 0);
                         }
                         sendBroadcast(new Intent().setAction(UPDATE_ACTION).
                                 putExtra("adapter", "BOTTOM"));
+                        sendBroadcast(new Intent().setAction(UPDATE_ACTION).
+                                putExtra("adapter", "TOP"));
 
 
                         return super.onFling(velocityX, velocityY);
@@ -208,16 +176,22 @@ public class MainActivity extends AppCompatActivity {
                 };
                 mSnapHelperTop.attachToRecyclerView(mRecyclerViewTop);
 
-            //--Для обновления ресайклера, когда ввели сумму, которую нужно перевести
+            //--Для обновления ресайклера, когда ввели сумму, которую нужно перевести-----
             mRecyclerAdapterTop.setNotifyCashChanged(new RecyclerAdapter.NotifyCashChanged() {
                 @Override
                 public void onNotify(String currencyName, double cash) {
                     /*mCurList.setCashToExchange(cash, idRecyclerTop);*/
+                    Log.d(CurrencyList.TAG,"MainActivity.setNotifyCashChanged: TOP " +
+                    currencyName + " " + cash);
                     mCurList.mCash.set( idRecyclerTop, currencyName, cash);
+                    sendBroadcast(new Intent().setAction(UPDATE_ACTION).
+                            putExtra("adapter", "BOTTOM"));
                 }
             });
 
-                //---Second recycler------
+                //---Second recycler--------------------------------------
+
+            //--Аналогично first recycler
 
                 mRecyclerViewBottom.setAdapter(mRecyclerAdapterBottom);
                 mRecyclerViewBottom.setLayoutManager(
@@ -235,89 +209,47 @@ public class MainActivity extends AppCompatActivity {
 
                         if(velocityX > 0) mCurList.changeCurrentlyExchange(mRecyclerViewBottom, 1);
                         else mCurList.changeCurrentlyExchange(mRecyclerViewBottom, -1);
-                        // Добавляем обнуление cash при свайпе,
-                        // если данным ресайклером последнее значение и было установлено
+
                         if(mCurList.mCash.getChanger().equals(idRecyclerBottom)){
+                            Log.d(CurrencyList.TAG,"MainActivity.onFling: BOTTOM CLEARNING");
                             mCurList.mCash.set("", "", 0);
                         }
 
                         sendBroadcast(new Intent().setAction(UPDATE_ACTION).
                                 putExtra("adapter", "TOP"));
+                        sendBroadcast(new Intent().setAction(UPDATE_ACTION).
+                                putExtra("adapter", "BOTTOM"));
 
                         return super.onFling(velocityX, velocityY);
                     }
                 };
                 mSnapHelperBottom.attachToRecyclerView(mRecyclerViewBottom);
 
-            //--Для обновления ресайклера, когда ввели сумму, которую нужно перевести
+            //--Для обновления другого ресайклера, когда ввели сумму, которую нужно перевести---
             mRecyclerAdapterBottom.setNotifyCashChanged(new RecyclerAdapter.NotifyCashChanged() {
                 @Override
                 public void onNotify(String currencyName, double cash) {
-                    /*mCurList.setCashToExchange(cash, idRecyclerBottom);*/
+                    Log.d(CurrencyList.TAG,"MainActivity.setNotifyCashChanged: BOTTOM " +
+                            currencyName + " " + cash);
                     mCurList.mCash.set( idRecyclerBottom, currencyName, cash);
+                    sendBroadcast(new Intent().setAction(UPDATE_ACTION).
+                            putExtra("adapter", "TOP"));
                 }
             });
 
-                //----Работа с конкретными вью ресайклера------------------------
-
-            /*View view = findViewById(R.id.id_edit_exchange_number);*/
-            /*EditText editText = (EditText) mRecyclerViewTop.
-                    findContainingItemView(view);*/
-            /*RecyclerView.ViewHolder editText =
-                    mRecyclerViewTop.findViewHolderForItemId(R.id.id_edit_exchange_number);*/
-            /*editText.addTextChangedListener(new TextWatcher() {
-                @Override
-                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                    Log.d(CurrencyList.TAG,"TextChangedListener.beforeTextChanged: " + s.toString());
-                }
-
-                @Override
-                public void onTextChanged(CharSequence s, int start, int before, int count) {
-                    Log.d(CurrencyList.TAG,"TextChangedListener.onTextChanged: " + s.toString());
-                }
-
-                @Override
-                public void afterTextChanged(Editable s) {
-
-                    Log.d(CurrencyList.TAG,"TextChangedListener.afterTextChanged: " + s.toString()*//* +
-                            "touch event: " + cashAmount.didTouchFocusSelect()*//*);
-                }
-            });*/
-
-            //------------------------------------------
-
-            //------Пероидизация подкачки данных с сайта---
-            service.loadData();
-            mAlarmManager = (AlarmManager) context.getSystemService(ALARM_SERVICE);
-            //--Просмотреть каждое действие в строке и искать момент вызова onReceive
-            // (сопоставя с sendBroadcast)
-
-            Intent alarmIntent = new Intent(context, LoadBroadcastReceiver.class);
-            alarmIntent.setAction(LOAD_ACTION);//--возможно это не нужно
-            PendingIntent alarmPending = PendingIntent.getBroadcast(context, 0, alarmIntent, 0);
-            //--maybeProblem--Система сдигает время до 60000 mls
-            mAlarmManager.setRepeating(AlarmManager.RTC, System.currentTimeMillis(), 30000, alarmPending);
 
             //--------------------------------------------------------------------------------------
 
+            //------Пероидизация подкачки данных с сайта------
+            service.loadData();
+            mAlarmManager = (AlarmManager) context.getSystemService(ALARM_SERVICE);
 
-            /*editCashAmountView = (EditText) mRecyclerViewTop.findContainingItemView();*
-            editCashAmountView.addTextChangedListener(new TextWatcher() {
-                @Override
-                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                    Log.d(CurrencyList.TAG,"TextChangedListener.beforeTextChanged: " + s.toString());
-                }
+            Intent alarmIntent = new Intent(context, LoadBroadcastReceiver.class);
+            PendingIntent alarmPending = PendingIntent.getBroadcast(context, 0, alarmIntent, 0);
+            //--maybeProblem--Система сдигает время до 60000 ms
+            mAlarmManager.setRepeating(AlarmManager.RTC, System.currentTimeMillis(), 30000, alarmPending);
 
-                @Override
-                public void onTextChanged(CharSequence s, int start, int before, int count) {
-                    Log.d(CurrencyList.TAG,"TextChangedListener.onTextChanged: " + s.toString());
-                }
-
-                @Override
-                public void afterTextChanged(Editable s) {
-                    Log.d(CurrencyList.TAG,"TextChangedListener.afterTextChanged: " + s.toString());
-                }
-            });*/
+            //--------------------------------------------------------------------------------------
 
         }
 
@@ -348,5 +280,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        AlarmManager alarmManagerCancled = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
+        alarmManagerCancled.cancel(PendingIntent.getBroadcast(this, 0,
+                new Intent(this, LoadBroadcastReceiver.class), 0));
+        unbindService(serviceConnection);
+        unregisterReceiver(broadcastReceiver);
+    }
 
 }

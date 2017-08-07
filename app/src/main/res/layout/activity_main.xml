@@ -7,7 +7,8 @@
     android:layout_height="match_parent"
     tools:context="com.example.gor.revolut_test.MainActivity">
 
-    <Toolbar
+    <!--// может на будущее
+        <Toolbar
         android:id="@+id/id_toolbar_fx"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -26,13 +27,12 @@
             android:padding="5sp"
             android:layout_marginLeft="50sp"/>
 
-    </Toolbar>
+    </Toolbar>-->
 
     <android.support.v7.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/id_recycler_top"
-        android:layout_below="@id/id_toolbar_fx"/>
+        android:id="@+id/id_recycler_top"/>
 
     <android.support.v7.widget.RecyclerView
         android:layout_width="match_parent"

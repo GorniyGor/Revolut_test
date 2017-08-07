@@ -15,7 +15,7 @@ import java.util.concurrent.Executors;
 
 public class DataLoader {
     private ExecutorService executor;
-    public static HashMap<String, String> FX_URL = CurrencyList.FX_URL;
+    private HashMap<String, String> FX_URL = CurrencyList.FX_URL;
     private final DataHasBeenLoadedListener loadedListener;
 
     public DataLoader(DataHasBeenLoadedListener loadedListener){

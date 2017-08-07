@@ -34,6 +34,7 @@ class JSONHandler {
                 newCurrency.setCurrencyRate(key, rates.getDouble(key));
                 Log.d(CurrencyList.TAG,"JSONHandler: " + currencyFrom + " " + key);
             }
+            //--Запись в хранилище--
             mCurList.setCurrency(currencyFrom, newCurrency);
             Log.d(CurrencyList.TAG,"JSONHandler: after for");
 

@@ -8,7 +8,7 @@ import android.util.Log;
 import com.example.gor.revolut_test.Internet.LoadService;
 
 
-//--В отдельном файле, т.к. бродкаст, которым пользуется AlarmManager, нужно прописывать в манифесе
+//--В отдельном файле, т.к. бродкаст, которым пользуется AlarmManager, нужно прописывать в манифесе-
 public class LoadBroadcastReceiver extends BroadcastReceiver {
 
     @Override

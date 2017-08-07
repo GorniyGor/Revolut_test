@@ -17,19 +17,22 @@ public class CurrencyList {
 
     public static final String TAG = "myLogs" ;
 
+    //--Выставляется в DataLoader.class
     public static HashMap<String, String> FX_URL = new HashMap<>();
+    //--Выставляется в MainActivity.class
     public static final HashMap<String, RecyclerView> RV_NAMES = new HashMap<>();
-
     public static volatile CurrencyList sSelf;
+
     private DataChangedListener mDataChangedListener;
     private HashMap<RecyclerView, Integer>  currentlyExchange = new HashMap<>();
-    private String otherCurrency = null; //---Нужно для метода getCurrencyFrom
+    private String otherCurrency = null;
 
     private HashMap<String, CurrencyClass> exchangeRate = new HashMap<>();
-    private ArrayList<String> positionOfCurrency = new ArrayList<>(); //--Optimization--Вместо него можно FX_URL ArrayList
+    //--optimization--вместо него можно FX_URL ArrayList
+    private ArrayList<String> positionOfCurrency = new ArrayList<>();
     private String currentCurrencyFrom = null;
-    //--Количество денег, которое хотят перевести в другую валюту
-    public Cash mCash = new Cash();
+
+    public Cash mCash = new Cash();//--Количество денег, которое хотят перевести в другую валюту
 
 
     public static CurrencyList getInstance(){
@@ -43,10 +46,6 @@ public class CurrencyList {
         return sSelf;
     }
     //------------------------------------------------------
-
-    public void setDataChangedListener(DataChangedListener listener){
-        mDataChangedListener = listener;
-    }
 
     //--Main work methods-----------------------------------
 
@@ -71,57 +70,11 @@ public class CurrencyList {
         return null;
     }
 
-    /*public double getRateAnother() {
-        double rate = 0;
-        if(currentCurrencyFrom != null && otherCurrency != null) {
-            if(currentCurrencyFrom.equals(otherCurrency)) rate = 1;
-            else rate = exchangeRate.get(otherCurrency).getRate(currentCurrencyFrom);
-        }
-        return rate;
-    }*/
-
-    //-----------------------------------------------------
-
-    //--Нет надобности т.к. переделали систему с cash
-    /*public void initCashToExchange(String name) {cashToExchange.put(name, (double)0);}
-
-    public double getCashToExchange(String name){
-        if(cashToExchange.size() < 2){ // Инициализация
-            cashToExchange.put(name, (double)0);
-        }
-        double cash = 0;
-        for (Map.Entry entry: cashToExchange.entrySet() ) {
-            if(!name.equals(entry.getKey())){
-                cash = (double) entry.getValue();
-            }
-        }
-        Log.d(TAG, "CurrencyList.GETCashToExchange: name: " + name + "; cash: " + cash);
-        return cash;
-    }
-
-    //--Идёт зацикливание, но потестируя UI, кажется, это не алгоритмическая ошибка,
-    // а системная: при медленном пролистывании вью не понимает, какая из двух
-    // (настоящая или будущая) валюта в данный момент отображена.
-    // При подёргивании (чтобы точно поняла) зацикливание прекращается,
-    // т.к. само зацикливание происходит из-за слишком быстрого изменения числа в эдиторе,
-    // что в базу оно не успевает заноситься или типа того
-    public void setCashToExchange(double cash, String name){
-        if(cash != cashToExchange.get(name)) {
-            cashToExchange.put(name, cash);
-            Log.d(TAG, "CurrencyList.SETCashToExchange: name: " + name + "; cash: " + cash);
-            for (Map.Entry entry: cashToExchange.entrySet() ) {
-                if(!name.equals(entry.getKey())){
-                    mDataChangedListener.onNotify((String)entry.getKey());
-                }
-            }
-        }
-    }*/
-
 
     //----Для взаимодействия между вью (валютами)---------------------------------------------------
 
-    //---Необходимо для понимания, какие именно валюты в ланный момент нужно обменивать
-    //---А для этого нужно понимать, какая валюта стоит в другой вьюшке
+    //--Необходимо для понимания, какие именно валюты в ланный момент нужно обменивать---
+    // А для этого нужно понимать, какая валюта стоит в другой вьюшке
     public void changeCurrentlyExchange(RecyclerView name, Integer mod){
         int currency = currentlyExchange.get(name);
         if(mod < 0 && currency == 0) return;
@@ -135,37 +88,53 @@ public class CurrencyList {
 
     public int getCurrentlyExchangeSize(){return currentlyExchange.size();}
 
-    //---В структуре currentlyExchange должно быть только 2 элемента,
-    //---соответственно для одной вьюшки и для другой.
-    //---Нам нужно взять название валюты у другой (не собственной) вьюшки
+    // В структуре currentlyExchange должно быть только 2 элемента,
+    // соответственно для одной вьюшки и для другой.
+    // Нам нужно взять название валюты у другой (не собственной) вьюшки
     public String getCurrencyFrom(String  name){
 
-        /*Log.d(TAG, "getCurrencyFrom: RecyclerView " + name + " = " + RV_NAMES.get(name).toString());*/
-        RecyclerView currency = RV_NAMES.get(name); // Можно просто по name поиск сделать, переопределив currentlyExchange
+        /*Log.d(TAG, "getCurrencyFrom: RecyclerView " + name + " = "
+        + RV_NAMES.get(name).toString());*/
+
+        ////--optimization--можно просто по name поиск сделать, переопределив currentlyExchange
+        RecyclerView currency = RV_NAMES.get(name);
 
         if(currentlyExchange.size() > 2) Log.d(TAG, "getCurrencyFrom: ViewGroup parents too many!");
 
-        /*Log.d(TAG, "getCurrencyFrom: currentlyExchange is empty? - " + currentlyExchange.isEmpty());*/
+        /*Log.d(TAG, "getCurrencyFrom: currentlyExchange is empty? - "
+        + currentlyExchange.isEmpty());*/
         for(Map.Entry entry : currentlyExchange.entrySet()){
-            /*Log.d(TAG, "getCurrencyFrom: currentlyExchange " + entry.getKey() + " = " + entry.getValue());*/
+            /*Log.d(TAG, "getCurrencyFrom: currentlyExchange " + entry.getKey() + " = "
+            + entry.getValue());*/
             if(!currency.equals(entry.getKey())){
                 otherCurrency = positionOfCurrency.get((Integer) entry.getValue());
             }
         }
         return otherCurrency;
     }
+    //----------------------------------------------------------------------------------------------
+
+    //--Addition-------
 
     //--Для обновления данных
+    public void setDataChangedListener(DataChangedListener listener){
+        mDataChangedListener = listener;
+    }
+
     public interface DataChangedListener{
         void onNotify(String adapterName);
     }
 
-    //--Problem--При исходном верхнем ресайклере: при записи числа низ не обновляется(?),
-    // но как только подгружаются данные - перевод выполняется.
-    //--Зануление при скролле любого вью
-    //--При исзодном нижнем ресайклере ситуация похожая,
-    // но обновляется при скачивании с каким-то багом (возможно показалось) - число в эдиторе не введенное,
-    // а близкое к ниму(мб совпадение)
+    //--Problem--
+    //--При исходном верхнем ресайклере: если сбиваются валюты (из-за скролла),
+    // то не показывается число в эдиторе валюты, с которой переводили
+    // (т.к. валюта сбилась и исходное значение находится в другой валюте, которой не видно)
+    //--При исходном нижнем ресайклере:
+    // - при свайпе верхнего зануляется как минимум текущее число в исходной валюте
+    // (цифры на верхнем остаются) - не всегда
+    //--Общая для ресайклеров: зацикливание при вводе числа (при незануленном cash?),
+    // т.к. при обновлении верхнего почему-то срабатывает touch
+
     public class Cash{
         private double cashToExchange = 0; //--Sum that had been entered in EditView
         private String changerId = ""; //--RecyclerView which had been done it

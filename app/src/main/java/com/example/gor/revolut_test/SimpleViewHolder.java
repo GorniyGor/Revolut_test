@@ -20,8 +20,6 @@ class SimpleViewHolder extends RecyclerView.ViewHolder {
     private TextView currancyRate;
     private EditText cashAmount;
 
-    /*double currancyRateNamber;*/
-
     public SimpleViewHolder(View itemView) {
         super(itemView);
 
@@ -31,14 +29,10 @@ class SimpleViewHolder extends RecyclerView.ViewHolder {
 
         cashAmount.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                /*Log.d(CurrencyList.TAG,"TextChangedListener.beforeTextChanged: " + s.toString());*/
-            }
-
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                /*Log.d(CurrencyList.TAG,"TextChangedListener.onTextChanged: " + s.toString());*/
-            }
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
 
             @Override
             public void afterTextChanged(Editable s) {
@@ -48,36 +42,27 @@ class SimpleViewHolder extends RecyclerView.ViewHolder {
                 if(cashAmount.didTouchFocusSelect() && !s.toString().equals("")) {
                     Double cash = Double.valueOf(s.toString());
                     if ( cash != 0){
-                        //CurrencyList.getInstance().setCashToExchange(cash);
                         // Через MainActivity ментается (проброс туда через адаптер)
                         mCashChangedNotify.onNotify(cash);
                     }
                 }
-                //--Нужно добавить обновления другого ресайклера, но
-                // нужно учесть, что этот метод вызывается ещё и когда программно меняется текст  - учли
-                // +
-                // Не сразу выставлять значение эдитора, чтобы не нужно было удалять 0
-                //-- Слишком длинные числа, сделать максимум 8 цифр - сделали, но
-                // +
-                // ограничить получаемое при переводе число 9тью цифрами
-
             }
         });
     }
 
-    //--Main work method----
+    //--Main work method-------
 
     public void setCurrancyName(String currancyNameString){ currancyName.setText(currancyNameString); }
+
     public void setCurrancyRate(double currancyRateNumber){
-        /*this.currancyRateNamber = currancyRateNumber;*/
         currancyRate.setText("1 = * " + currancyRateNumber); }
-    //--Нужен литенер editText
+
     public void setCashAmount(Double cashAmountNumber){
         if(cashAmountNumber == 0) cashAmount.setText("");
         else cashAmount.setText(cashAmountNumber.toString()); }
 
     //--Addition----------
-    //--Для перевода числа с одной валюты на другую---
+    //--Для перевода введенного числа из одной валюты в другую---
 
     public void setCashChangedNotify(CashChangedNotify cashChangedNotify){
         mCashChangedNotify = cashChangedNotify;
