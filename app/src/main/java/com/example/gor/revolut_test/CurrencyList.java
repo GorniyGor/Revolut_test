@@ -6,6 +6,7 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Created by Gor on 26.07.2017.
@@ -23,7 +24,6 @@ public class CurrencyList {
     public static final HashMap<String, RecyclerView> RV_NAMES = new HashMap<>();
     public static volatile CurrencyList sSelf;
 
-    private DataChangedListener mDataChangedListener;
     private HashMap<RecyclerView, Integer>  currentlyExchange = new HashMap<>();
     private String otherCurrency = null;
 
@@ -55,7 +55,7 @@ public class CurrencyList {
     }
 
     public double getRate(String currencyFrom, String currencyTo){
-        if(currencyTo != currencyFrom) {
+        if(!Objects.equals(currencyTo, currencyFrom)) {
             return exchangeRate.get(currencyFrom).getRate(currencyTo);
         }
         else return 1;
@@ -73,7 +73,7 @@ public class CurrencyList {
 
     //----Для взаимодействия между вью (валютами)---------------------------------------------------
 
-    //--Необходимо для понимания, какие именно валюты в ланный момент нужно обменивать---
+    //--Необходимо для понимания, какие именно валюты в данный момент нужно обменивать---
     // А для этого нужно понимать, какая валюта стоит в другой вьюшке
     public void changeCurrentlyExchange(RecyclerView name, Integer mod){
         int currency = currentlyExchange.get(name);
@@ -90,22 +90,15 @@ public class CurrencyList {
 
     // В структуре currentlyExchange должно быть только 2 элемента,
     // соответственно для одной вьюшки и для другой.
-    // Нам нужно взять название валюты у другой (не собственной) вьюшки
+    // Нам нужно взять название валюты у другой (несобственной) вьюшки
     public String getCurrencyFrom(String  name){
-
-        /*Log.d(TAG, "getCurrencyFrom: RecyclerView " + name + " = "
-        + RV_NAMES.get(name).toString());*/
 
         ////--optimization--можно просто по name поиск сделать, переопределив currentlyExchange
         RecyclerView currency = RV_NAMES.get(name);
 
         if(currentlyExchange.size() > 2) Log.d(TAG, "getCurrencyFrom: ViewGroup parents too many!");
 
-        /*Log.d(TAG, "getCurrencyFrom: currentlyExchange is empty? - "
-        + currentlyExchange.isEmpty());*/
         for(Map.Entry entry : currentlyExchange.entrySet()){
-            /*Log.d(TAG, "getCurrencyFrom: currentlyExchange " + entry.getKey() + " = "
-            + entry.getValue());*/
             if(!currency.equals(entry.getKey())){
                 otherCurrency = positionOfCurrency.get((Integer) entry.getValue());
             }
@@ -116,38 +109,20 @@ public class CurrencyList {
 
     //--Addition-------
 
-    //--Для обновления данных
-    public void setDataChangedListener(DataChangedListener listener){
-        mDataChangedListener = listener;
-    }
-
-    public interface DataChangedListener{
-        void onNotify(String adapterName);
-    }
-
-    //--Problem--
-    //--При исходном верхнем ресайклере: если сбиваются валюты (из-за скролла),
-    // то не показывается число в эдиторе валюты, с которой переводили
-    // (т.к. валюта сбилась и исходное значение находится в другой валюте, которой не видно)
-    //--При исходном нижнем ресайклере:
-    // - при свайпе верхнего зануляется как минимум текущее число в исходной валюте
-    // (цифры на верхнем остаются) - не всегда
-    //--Общая для ресайклеров: зацикливание при вводе числа (при незануленном cash?),
-    // т.к. при обновлении верхнего почему-то срабатывает touch
 
     public class Cash{
         private double cashToExchange = 0; //--Sum that had been entered in EditView
         private String changerId = ""; //--RecyclerView which had been done it
-        private String versionChengerId = ""; //--Currency which had been done it
+        private String versionChangerId = ""; //--Currency which had been done it
 
         public void set(String id, String vId, double sum){
             changerId = id;
-            versionChengerId = vId;
+            versionChangerId = vId;
             cashToExchange = sum;
         }
 
         public String getChanger(){ return changerId; }
-        public String getVersionOfChanger() { return versionChengerId; }
+        public String getVersionOfChanger() { return versionChangerId; }
         public double getCash(){ return cashToExchange; }
     }
 }
