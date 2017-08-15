@@ -3,7 +3,6 @@ package com.example.gor.revolut_test;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -37,8 +36,8 @@ class SimpleViewHolder extends RecyclerView.ViewHolder {
             @Override
             public void afterTextChanged(Editable s) {
 
-                Log.d(CurrencyList.TAG,"TextChangedListener.afterTextChanged: " + s.toString() +
-                "touch event: " + cashAmount.isFocused());
+                /*Log.d(CurrencyList.TAG,"TextChangedListener.afterTextChanged: " + s.toString() +
+                "touch event: " + cashAmount.isFocused());*/
                 if(cashAmount.isFocused() && !s.toString().equals("")) {
                     Double cash = Double.valueOf(s.toString());
                     if ( cash != 0){

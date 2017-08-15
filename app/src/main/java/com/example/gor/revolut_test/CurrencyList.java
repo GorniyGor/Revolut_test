@@ -119,6 +119,9 @@ public class CurrencyList {
             changerId = id;
             versionChangerId = vId;
             cashToExchange = sum;
+
+            Log.d(CurrencyList.TAG,"CurrencyList: changerId: " + id +
+                    " versionChangerId: " + vId + " cashToExchange: " + sum );
         }
 
         public String getChanger(){ return changerId; }

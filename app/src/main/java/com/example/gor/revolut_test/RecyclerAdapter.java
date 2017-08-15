@@ -1,6 +1,7 @@
 package com.example.gor.revolut_test;
 
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
@@ -51,6 +52,11 @@ class RecyclerAdapter extends RecyclerView.Adapter<SimpleViewHolder>{
         if( ownCurrencyName != null) {
 
 
+            Log.d(CurrencyList.TAG,"RecyclerAdapter.onBindViewHolder: name: " + name +
+                    " currency: " + ownCurrencyName + " position: " + position );
+            //--Problem--Записывающая cash валюта не та
+            // Т.к. метод использует валюту не ту, с которой переводят в данный момент,
+            // а последнюю обновленную в данном ресайклере
             holder.setCashChangedNotify(new SimpleViewHolder.CashChangedNotify() {
                 @Override
                 public void onNotify(double cash) {
@@ -72,8 +78,13 @@ class RecyclerAdapter extends RecyclerView.Adapter<SimpleViewHolder>{
                 // А вот валюта, которая могла бы быть исходной (другая валюта из того же ресайклера),
                 // должна получить 0, чтобы число от соседнего item не сохранилось при свайпе -второе условие-
                 if(mCurList.mCash.getChanger().equals(name)){
-                    if(mCurList.mCash.getVersionOfChanger().equals(ownCurrencyName))
+                    if(mCurList.mCash.getVersionOfChanger().equals(ownCurrencyName)) {
                         sum = mCurList.mCash.getCash();
+                        Log.d(CurrencyList.TAG,"RecyclerAdapter: name: " + name +
+                        " currency: " + ownCurrencyName + " CASH: " + sum +
+                                "------------------------------------");
+                    }
+
                 }
                 else sum = mCurList.mCash.getCash()*rateAnother;
             }

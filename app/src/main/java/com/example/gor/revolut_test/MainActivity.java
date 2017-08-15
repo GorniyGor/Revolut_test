@@ -15,7 +15,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PagerSnapHelper;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SnapHelper;
-import android.util.Log;
 
 import com.example.gor.revolut_test.Internet.LoadService;
 
@@ -47,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
                 LoadService.MyBinder b = (LoadService.MyBinder) binder;
                 service = b.getService();
                 sendBroadcast(new Intent().setAction(BR_ACTION));
-                Log.d(CurrencyList.TAG,"onServiceConnected: getService" );
+                /*Log.d(CurrencyList.TAG,"onServiceConnected: getService" );*/
             }
 
             @Override
@@ -59,6 +58,8 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, LoadService.class);
         bindService(intent, serviceConnection, BIND_AUTO_CREATE);
         //----------------------------------------------------------------
+        //------
+
 
 
     }
@@ -92,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
 
                         }
 
-                        Log.d(CurrencyList.TAG,"MainActivity: NotifyListener.onNotify setCurrentlyExchange" );
+                        /*Log.d(CurrencyList.TAG,"MainActivity: NotifyListener.onNotify setCurrentlyExchange" );*/
 
                         sendBroadcast(new Intent().setAction(UPDATE_ACTION).
                                 putExtra("adapter", "both"));
@@ -137,9 +138,9 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public boolean onFling (int velocityX, int velocityY){
 
-                        Log.d(CurrencyList.TAG,"MainActivity: SnapHelper.onFling TOP" +
+                        /*Log.d(CurrencyList.TAG,"MainActivity: SnapHelper.onFling TOP" +
                                 " velocityX- " + velocityX + " ; ScrollDistance- " +
-                                calculateScrollDistance(velocityX, velocityY)[0]);
+                                calculateScrollDistance(velocityX, velocityY)[0]);*/
 
                         // Для понимания, какую валюту показывать при свайпе
                         if(velocityX > 0) mCurList.changeCurrentlyExchange(mRecyclerViewTop, 1);
@@ -149,12 +150,14 @@ public class MainActivity extends AppCompatActivity {
                         // если данным ресайклером последнее значение и было установлено
                         if(mCurList.mCash.getChanger().equals(idRecyclerTop)){
 
-                            Log.d(CurrencyList.TAG,"MainActivity.onFling: TOP CLEARING");
+                            /*Log.d(CurrencyList.TAG,"MainActivity.onFling: TOP CLEARING");*/
 
                             mCurList.mCash.set("", "", 0);
                         }
                         sendBroadcast(new Intent().setAction(UPDATE_ACTION).
                                 putExtra("adapter", "BOTTOM"));
+                        // Себя обновляем чтобы не было сохранено значение эдитора при свайпе,
+                        // если мы его тут занулили
                         sendBroadcast(new Intent().setAction(UPDATE_ACTION).
                                 putExtra("adapter", "TOP"));
 
@@ -169,8 +172,8 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onNotify(String currencyName, double cash) {
 
-                    Log.d(CurrencyList.TAG,"MainActivity.setNotifyCashChanged: TOP " +
-                    currencyName + " " + cash);
+                    /*Log.d(CurrencyList.TAG,"MainActivity.setNotifyCashChanged: TOP " +
+                    currencyName + " " + cash);*/
 
                     mCurList.mCash.set( idRecyclerTop, currencyName, cash);
                     sendBroadcast(new Intent().setAction(UPDATE_ACTION).
@@ -192,22 +195,24 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public boolean onFling (int velocityX, int velocityY){
 
-                        Log.d(CurrencyList.TAG,"MainActivity: SnapHelper.onFling BOTTOM" +
+                        /*Log.d(CurrencyList.TAG,"MainActivity: SnapHelper.onFling BOTTOM" +
                                 " velocityX- " + velocityX + " ; ScrollDistance- " +
-                                calculateScrollDistance(velocityX, velocityY)[0]);
+                                calculateScrollDistance(velocityX, velocityY)[0]);*/
 
                         if(velocityX > 0) mCurList.changeCurrentlyExchange(mRecyclerViewBottom, 1);
                         else mCurList.changeCurrentlyExchange(mRecyclerViewBottom, -1);
 
                         if(mCurList.mCash.getChanger().equals(idRecyclerBottom)){
 
-                            Log.d(CurrencyList.TAG,"MainActivity.onFling: BOTTOM CLEARING");
+                            /*Log.d(CurrencyList.TAG,"MainActivity.onFling: BOTTOM CLEARING");*/
 
                             mCurList.mCash.set("", "", 0);
                         }
 
                         sendBroadcast(new Intent().setAction(UPDATE_ACTION).
                                 putExtra("adapter", "TOP"));
+                        // Себя обновляем чтобы не было сохранено значение эдитора при свайпе,
+                        // если мы его тут занулили
                         sendBroadcast(new Intent().setAction(UPDATE_ACTION).
                                 putExtra("adapter", "BOTTOM"));
 
@@ -221,8 +226,8 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onNotify(String currencyName, double cash) {
 
-                    Log.d(CurrencyList.TAG,"MainActivity.setNotifyCashChanged: BOTTOM " +
-                            currencyName + " " + cash);
+                    /*Log.d(CurrencyList.TAG,"MainActivity.setNotifyCashChanged: BOTTOM " +
+                            currencyName + " " + cash);*/
 
                     mCurList.mCash.set( idRecyclerBottom, currencyName, cash);
                     sendBroadcast(new Intent().setAction(UPDATE_ACTION).
@@ -240,7 +245,7 @@ public class MainActivity extends AppCompatActivity {
             Intent alarmIntent = new Intent(context, LoadBroadcastReceiver.class);
             PendingIntent alarmPending = PendingIntent.getBroadcast(context, 0, alarmIntent, 0);
             //--maybeProblem--Система сдигает время до 60000 ms
-            mAlarmManager.setRepeating(AlarmManager.RTC, System.currentTimeMillis(), 30000, alarmPending);
+            mAlarmManager.setRepeating(AlarmManager.RTC, System.currentTimeMillis(), 3000000, alarmPending);
 
             //--------------------------------------------------------------------------------------
 
