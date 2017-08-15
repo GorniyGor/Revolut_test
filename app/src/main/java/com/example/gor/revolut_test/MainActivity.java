@@ -170,12 +170,13 @@ public class MainActivity extends AppCompatActivity {
             //--Для обновления ресайклера, когда ввели сумму, которую нужно перевести-----
             mRecyclerAdapterTop.setNotifyCashChanged(new RecyclerAdapter.NotifyCashChanged() {
                 @Override
-                public void onNotify(String currencyName, double cash) {
+                public void onNotify(double cash) {
 
                     /*Log.d(CurrencyList.TAG,"MainActivity.setNotifyCashChanged: TOP " +
                     currencyName + " " + cash);*/
 
-                    mCurList.mCash.set( idRecyclerTop, currencyName, cash);
+                    mCurList.mCash.set( idRecyclerTop,
+                            mCurList.getCurrencyFrom(idRecyclerBottom), cash);
                     sendBroadcast(new Intent().setAction(UPDATE_ACTION).
                             putExtra("adapter", "BOTTOM"));
                 }
@@ -224,12 +225,13 @@ public class MainActivity extends AppCompatActivity {
             //--Для обновления другого ресайклера, когда ввели сумму, которую нужно перевести---
             mRecyclerAdapterBottom.setNotifyCashChanged(new RecyclerAdapter.NotifyCashChanged() {
                 @Override
-                public void onNotify(String currencyName, double cash) {
+                public void onNotify(double cash) {
 
                     /*Log.d(CurrencyList.TAG,"MainActivity.setNotifyCashChanged: BOTTOM " +
                             currencyName + " " + cash);*/
 
-                    mCurList.mCash.set( idRecyclerBottom, currencyName, cash);
+                    mCurList.mCash.set( idRecyclerBottom,
+                            mCurList.getCurrencyFrom(idRecyclerTop), cash);
                     sendBroadcast(new Intent().setAction(UPDATE_ACTION).
                             putExtra("adapter", "TOP"));
                 }

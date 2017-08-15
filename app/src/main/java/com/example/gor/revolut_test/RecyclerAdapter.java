@@ -54,13 +54,10 @@ class RecyclerAdapter extends RecyclerView.Adapter<SimpleViewHolder>{
 
             Log.d(CurrencyList.TAG,"RecyclerAdapter.onBindViewHolder: name: " + name +
                     " currency: " + ownCurrencyName + " position: " + position );
-            //--Problem--Записывающая cash валюта не та
-            // Т.к. метод использует валюту не ту, с которой переводят в данный момент,
-            // а последнюю обновленную в данном ресайклере
             holder.setCashChangedNotify(new SimpleViewHolder.CashChangedNotify() {
                 @Override
                 public void onNotify(double cash) {
-                    mNotifyCashChanged.onNotify(ownCurrencyName, cash);
+                    mNotifyCashChanged.onNotify(cash);
                 }
             });
 
@@ -102,13 +99,13 @@ class RecyclerAdapter extends RecyclerView.Adapter<SimpleViewHolder>{
         return 3;
     }
 
-    //----Addition----
+    //----Addition-----
 
     public void setNotifyCashChanged(NotifyCashChanged notifyCashChanged){
         mNotifyCashChanged = notifyCashChanged;
     }
 
     public interface NotifyCashChanged {
-        void onNotify(String currency, double cash);
+        void onNotify(double cash);
     }
 }
