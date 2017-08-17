@@ -9,6 +9,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 /**
  * Created by Gor on 25.07.2017.
  */
@@ -26,6 +30,8 @@ class JSONHandler {
         try{
             Log.d(CurrencyList.TAG,"JSONHandler: try");
             dataJsonObj = new JSONObject(jsonString);
+
+            // Работа с валютами
             JSONObject rates = dataJsonObj.getJSONObject("rates");
             JSONArray rateKeys = rates.names();
 
@@ -36,9 +42,17 @@ class JSONHandler {
             }
             //--Запись в хранилище--
             mCurList.setCurrency(currencyFrom, newCurrency);
+
+            // Работа с метаданными, в частности с датой скачивания
+            String dateString = dataJsonObj.getString("date");
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            Date date = simpleDateFormat.parse(dateString);
+
+            mCurList.setDate(date);
+
             Log.d(CurrencyList.TAG,"JSONHandler: after for");
 
         }
-        catch (JSONException ex){ ex.printStackTrace(); }
+        catch (JSONException | ParseException ex){ ex.printStackTrace(); }
     }
 }

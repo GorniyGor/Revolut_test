@@ -15,8 +15,13 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PagerSnapHelper;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SnapHelper;
+import android.widget.TextView;
 
 import com.example.gor.revolut_test.Internet.LoadService;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -26,6 +31,8 @@ public class MainActivity extends AppCompatActivity {
     private LoadService service;
     private ServiceConnection serviceConnection;
     private RecyclerBroadcastReceiver broadcastReceiver = new RecyclerBroadcastReceiver();
+
+    private TextView textViewDate;
 
 
     @Override
@@ -38,6 +45,8 @@ public class MainActivity extends AppCompatActivity {
  /*     // может на будущее
         Toolbar mToolbar = (Toolbar) findViewById(R.id.id_toolbar_fx);
         setSupportActionBar(mToolbar);*/
+
+        textViewDate = (TextView) findViewById(R.id.id_text_update_time);
 
         //--Service initialization----------------------------------
         serviceConnection = new ServiceConnection() {
@@ -75,6 +84,8 @@ public class MainActivity extends AppCompatActivity {
         private CurrencyList mCurList = CurrencyList.getInstance();
         private AlarmManager mAlarmManager;
 
+        private GregorianCalendar gCalendar = new GregorianCalendar();
+
 
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -98,6 +109,11 @@ public class MainActivity extends AppCompatActivity {
                         sendBroadcast(new Intent().setAction(UPDATE_ACTION).
                                 putExtra("adapter", "both"));
 
+                        // Установка времени последнего обновления валют
+                        textViewDate.setText("Updated " + gCalendar.get(Calendar.HOUR_OF_DAY) +
+                                ":" + gCalendar.get(Calendar.MINUTE) +
+                                new SimpleDateFormat(", dd-MM-yyyy").
+                                        format(mCurList.getLastUpdateDate()));
                     }
                 };
                 service.setNotifyListener(mNotifyListener);

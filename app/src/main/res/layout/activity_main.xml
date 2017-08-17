@@ -7,45 +7,62 @@
     android:layout_height="match_parent"
     tools:context="com.example.gor.revolut_test.MainActivity">
 
-    <!--// может на будущее
-        <Toolbar
+    <!--может на будущее-->
+    <!--    <Toolbar
         android:id="@+id/id_toolbar_fx"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/colorPrimary"
-        android:navigationIcon="@drawable/back">
+        android:background="@color/colorPrimary"/>&lt;!&ndash;
+        android:navigationIcon="@drawable/back"&ndash;&gt;
 
         <TextView
             android:id="@+id/id_text_toolbar_rate"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="*1 = *0.0000"
+            android:text="<-&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&ndash;&gt;"
             android:textColor="#ffffff"
             android:textSize="27sp"
             android:background="@drawable/corner"
 
             android:padding="5sp"
-            android:layout_marginLeft="50sp"/>
+            android:layout_marginLeft="50sp"
+            android:gravity="center"/>
 
     </Toolbar>-->
 
     <android.support.v7.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/id_recycler_top"/>
+        android:id="@+id/id_recycler_top"
+
+        android:layout_marginTop="16sp"
+        android:layout_marginBottom="8sp"/>
 
     <android.support.v7.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/id_recycler_bottom"
-        android:layout_below="@id/id_recycler_top"/>
+
+        android:layout_below="@id/id_recycler_top"
+        android:layout_marginTop="8sp"/>
 
     <View
         android:layout_width="match_parent"
         android:layout_height="1sp"
-        android:background="@color/colorPrimaryDark"
+        android:background="@color/colorPrimaryLight"
 
         android:layout_above="@id/id_recycler_bottom"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/id_text_update_time"
+        android:text="Updated 00:00, 01-01-1996"
+        android:textColor="@color/colorPrimaryLight"
+
+        android:layout_below="@id/id_recycler_bottom"
+        android:gravity="center"
+        android:layout_marginTop="25sp"/>
 
 
 

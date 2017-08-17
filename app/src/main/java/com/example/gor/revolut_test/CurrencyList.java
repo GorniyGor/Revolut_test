@@ -4,6 +4,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -23,6 +24,8 @@ public class CurrencyList {
     //--Выставляется в MainActivity.class
     public static final HashMap<String, RecyclerView> RV_NAMES = new HashMap<>();
     public static volatile CurrencyList sSelf;
+
+    private Date lastUpdateDate = null;
 
     private HashMap<RecyclerView, Integer>  currentlyExchange = new HashMap<>();
     private String otherCurrency = null;
@@ -54,6 +57,10 @@ public class CurrencyList {
         positionOfCurrency.add(nameFrom);
     }
 
+    public void setDate(Date date){
+        lastUpdateDate = date;
+    }
+
     public double getRate(String currencyFrom, String currencyTo){
         if(!Objects.equals(currencyTo, currencyFrom)) {
             return exchangeRate.get(currencyFrom).getRate(currencyTo);
@@ -68,6 +75,10 @@ public class CurrencyList {
             return currentCurrencyFrom;
         }
         return null;
+    }
+
+    public Date getLastUpdateDate(){
+        return lastUpdateDate;
     }
 
 
