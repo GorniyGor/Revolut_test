@@ -30,28 +30,90 @@
 
     </Toolbar>-->
 
-    <android.support.v7.widget.RecyclerView
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/id_recycler_top"
+        android:id="@+id/id_frame_top"
 
         android:layout_marginTop="16sp"
-        android:layout_marginBottom="8sp"/>
+        android:layout_marginBottom="8sp">
 
-    <android.support.v7.widget.RecyclerView
+        <android.support.v7.widget.RecyclerView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/id_recycler_top"
+
+            android:paddingRight="46sp"
+            android:paddingLeft="46sp"/>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/croc1left"
+
+                android:layout_centerVertical="true"
+                android:paddingBottom="8sp"/>
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/croc1right"
+
+                android:layout_centerVertical="true"
+                android:layout_alignParentEnd="true"
+                android:paddingBottom="8sp"/>
+        </RelativeLayout>
+
+    </FrameLayout>
+
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/id_recycler_bottom"
+        android:id="@+id/id_frame_bottom"
 
-        android:layout_below="@id/id_recycler_top"
-        android:layout_marginTop="8sp"/>
+        android:layout_below="@id/id_frame_top"
+        android:layout_marginTop="8sp">
+
+        <android.support.v7.widget.RecyclerView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/id_recycler_bottom"
+
+            android:paddingRight="46sp"
+            android:paddingLeft="46sp"/>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/croc1left"
+
+                android:layout_centerVertical="true"
+                android:paddingBottom="8sp"/>
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/croc1right"
+
+                android:layout_centerVertical="true"
+                android:layout_alignParentEnd="true"
+                android:paddingBottom="8sp"/>
+        </RelativeLayout>
+
+    </FrameLayout>
 
     <View
         android:layout_width="match_parent"
         android:layout_height="1sp"
         android:background="@color/colorPrimaryLight"
 
-        android:layout_above="@id/id_recycler_bottom"/>
+        android:layout_above="@id/id_frame_bottom"/>
 
     <TextView
         android:layout_width="match_parent"
@@ -60,7 +122,7 @@
         android:text="Updated 00:00, 01-01-1996"
         android:textColor="@color/colorPrimaryLight"
 
-        android:layout_below="@id/id_recycler_bottom"
+        android:layout_below="@id/id_frame_bottom"
         android:gravity="center"
         android:layout_marginTop="25sp"/>
 
