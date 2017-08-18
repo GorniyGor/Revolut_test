@@ -53,6 +53,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/croc1left"
+                android:tint="#b0ffffff"
 
                 android:layout_centerVertical="true"
                 android:paddingBottom="8sp"/>
@@ -61,6 +62,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/croc1right"
+                android:tint="@color/colorTint"
 
                 android:layout_centerVertical="true"
                 android:layout_alignParentEnd="true"
@@ -92,6 +94,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/croc1left"
+                android:tint="@color/colorTint"
 
                 android:layout_centerVertical="true"
                 android:paddingBottom="8sp"/>
@@ -100,6 +103,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/croc1right"
+                android:tint="@color/colorTint"
 
                 android:layout_centerVertical="true"
                 android:layout_alignParentEnd="true"
@@ -113,7 +117,9 @@
         android:layout_height="1sp"
         android:background="@color/colorPrimaryLight"
 
-        android:layout_above="@id/id_frame_bottom"/>
+        android:layout_above="@id/id_frame_bottom"
+        android:layout_marginLeft="30sp"
+        android:layout_marginRight="30sp"/>
 
     <TextView
         android:layout_width="match_parent"
