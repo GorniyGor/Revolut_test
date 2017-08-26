@@ -43,8 +43,8 @@
             android:layout_height="wrap_content"
             android:id="@+id/id_recycler_top"
 
-            android:paddingRight="46sp"
-            android:paddingLeft="46sp"/>
+            android:paddingRight="40sp"
+            android:paddingLeft="40sp"/>
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -84,8 +84,8 @@
             android:layout_height="wrap_content"
             android:id="@+id/id_recycler_bottom"
 
-            android:paddingRight="46sp"
-            android:paddingLeft="46sp"/>
+            android:paddingRight="40sp"
+            android:paddingLeft="40sp"/>
 
         <RelativeLayout
             android:layout_width="match_parent"

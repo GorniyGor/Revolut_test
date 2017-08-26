@@ -21,6 +21,7 @@ import com.example.gor.revolut_test.Internet.LoadService;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
 
 public class MainActivity extends AppCompatActivity {
@@ -111,7 +112,7 @@ public class MainActivity extends AppCompatActivity {
 
                         // Установка времени последнего обновления валют
                         textViewDate.setText("Updated " + gCalendar.get(Calendar.HOUR_OF_DAY) +
-                                ":" + gCalendar.get(Calendar.MINUTE) +
+                                ":" + new SimpleDateFormat("mm").format(new Date()) +
                                 new SimpleDateFormat(", dd-MM-yyyy").
                                         format(mCurList.getLastUpdateDate()));
                     }
@@ -263,7 +264,7 @@ public class MainActivity extends AppCompatActivity {
             Intent alarmIntent = new Intent(context, LoadBroadcastReceiver.class);
             PendingIntent alarmPending = PendingIntent.getBroadcast(context, 0, alarmIntent, 0);
             //--maybeProblem--Система сдигает время до 60000 ms
-            mAlarmManager.setRepeating(AlarmManager.RTC, System.currentTimeMillis(), 3000000, alarmPending);
+            mAlarmManager.setRepeating(AlarmManager.RTC, System.currentTimeMillis(), 30000, alarmPending);
 
             //--------------------------------------------------------------------------------------
 

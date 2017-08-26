@@ -1,12 +1,20 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 24
-    buildToolsVersion "25.0.3"
+    signingConfigs {
+        config {
+            keyAlias 'key0'
+            keyPassword 'cg96FmcISUcS'
+            storeFile file("gor_key_store.jks")
+            storePassword 'muZi1vTIw95I'
+        }
+    }
+    compileSdkVersion 25
+    buildToolsVersion '25.0.3'
     defaultConfig {
         applicationId "com.example.gor.revolut_test"
-        minSdkVersion 21
-        targetSdkVersion 24
+        minSdkVersion 19
+        targetSdkVersion 25
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -15,12 +23,17 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.config
+            debuggable false
+            zipAlignEnabled true
+        }
+        debug {
         }
     }
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile fileTree(include: ['*.jar'], dir: 'libs')
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
@@ -28,5 +41,6 @@ dependencies {
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     compile 'com.android.support:recyclerview-v7:25.3.1'
     compile 'com.android.support:cardview-v7:25.3.1'
+    compile 'com.android.support:support-v4:25.3.1'
     testCompile 'junit:junit:4.12'
 }
