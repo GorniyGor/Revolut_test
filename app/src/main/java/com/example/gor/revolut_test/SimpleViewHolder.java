@@ -14,16 +14,17 @@ import android.widget.TextView;
 class SimpleViewHolder extends RecyclerView.ViewHolder {
 
     private CashChangedNotify mCashChangedNotify;
+    private CurrencyClickListener mCurrencyClickListener;
 
-    private TextView currancyName;
-    private TextView currancyRate;
+    private TextView currencyName;
+    private TextView currencyRate;
     private EditText cashAmount;
 
     public SimpleViewHolder(View itemView) {
         super(itemView);
 
-        currancyName = (TextView) itemView.findViewById(R.id.id_text_currency_name);
-        currancyRate = (TextView) itemView.findViewById(R.id.id_text_exchanged_rate);
+        currencyName = (TextView) itemView.findViewById(R.id.id_text_currency_name);
+        currencyRate = (TextView) itemView.findViewById(R.id.id_text_exchanged_rate);
         cashAmount = (EditText) itemView.findViewById(R.id.id_edit_exchange_number);
 
         cashAmount.addTextChangedListener(new TextWatcher() {
@@ -52,27 +53,45 @@ class SimpleViewHolder extends RecyclerView.ViewHolder {
                 }
             }
         });
+
+        currencyName.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mCurrencyClickListener.onClick();
+            }
+        });
     }
 
     //--Main work method-------
 
-    public void setCurrancyName(String currancyNameString){ currancyName.setText(currancyNameString); }
+    public void setCurrencyName(String currencyNameString){ currencyName.setText(currencyNameString); }
 
-    public void setCurrancyRate(double currancyRateNumber){
-        currancyRate.setText("1 = * " + currancyRateNumber); }
+    public void setCurrencyRate(double currencyRateNumber){
+        currencyRate.setText("1 = * " + currencyRateNumber); }
 
     public void setCashAmount(Double cashAmountNumber){
         if(cashAmountNumber == 0) cashAmount.setText("");
         else cashAmount.setText(cashAmountNumber.toString()); }
 
     //--Addition----------
-    //--Для перевода числа с одной валюты на другую---
+
+    //--Для перевода числа с одной валюты на другую в момент ввода числа---
+
+    public interface CashChangedNotify{
+        void onNotify(double cash);
+    }
 
     public void setCashChangedNotify(CashChangedNotify cashChangedNotify){
         mCashChangedNotify = cashChangedNotify;
     }
 
-    public interface CashChangedNotify{
-        void onNotify(double cash);
+    //--Для открытие окна со списком валют---
+
+    public interface CurrencyClickListener {
+        void onClick();
+    }
+
+    public void setCurrencyClickListener(CurrencyClickListener clickListener){
+        mCurrencyClickListener = clickListener;
     }
 }

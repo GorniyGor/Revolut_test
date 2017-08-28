@@ -14,11 +14,11 @@ import java.util.concurrent.Executors;
 
 public class DataLoader {
     private ExecutorService executor;
-    private HashMap<String, String> OPT_FX_URL = CurrencyList.OPT_FX_URL;
+    private HashMap<String, String> FX_URL = CurrencyList.FX_URL;
     private String url = "http://api.fixer.io/latest?base=";
-    private String[] curAbbreviation = {
-            "GBP","EUR","USD","AUD","CAD","CHF","CYP","CZK","DKK","EEK","HKD","HUF","ISK","JPY",
-            "KRW","LTL","LVL","MTL","NOK","NZD","PLN","ROL","SEK","SGD","SIT","SKK","TRL","ZAR"};
+    public static String[] curAbbreviation = {
+            "AUD","CAD","CHF","CYP","CZK","DKK","EEK","EUR","GBP","HKD","HUF","ISK","JPY","KRW",
+            "LTL","LVL","MTL","NOK","NZD","PLN","ROL","SEK","SGD","SIT","SKK","TRL","USD","ZAR"};
     private final DataHasBeenLoadedListener loadedListener;
 
     public DataLoader(DataHasBeenLoadedListener loadedListener){
@@ -28,20 +28,20 @@ public class DataLoader {
 
     private void start() {
         executor = Executors.newFixedThreadPool(1);
-        for(int i=0; i<curAbbreviation.length; i++){
-            OPT_FX_URL.put(curAbbreviation[i], url + curAbbreviation[i] );
+        for (String aCurAbbreviation : curAbbreviation) {
+            FX_URL.put(aCurAbbreviation, url + aCurAbbreviation);
         }
-        CurrencyList.FX_URL = new String[]{"GBP", "EUR", "USD"};
+        CurrencyList.OPT_FX_URL = new String[]{"GBP", "EUR", "USD"};
     }
 
     public void toLoadData(){
-        for (final String entry: CurrencyList.FX_URL) {
+        for (final String entry: CurrencyList.OPT_FX_URL) {
             //Скачивать нужно только 3 валюты
 
             executor.submit(new Runnable() {
                 @Override
                 public void run() {
-                    HttpRequest request = new HttpRequest(OPT_FX_URL.get(entry));
+                    HttpRequest request = new HttpRequest(FX_URL.get(entry));
                     int status = request.makeRequest();
 
                     if (status == HttpRequest.REQUEST_OK) {

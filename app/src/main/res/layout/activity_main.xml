@@ -5,7 +5,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.gor.revolut_test.MainActivity">
+    tools:context="com.example.gor.revolut_test.MainActivity"
+    android:id="@+id/id_main_screen_layout">
 
     <!--может на будущее-->
     <!--    <Toolbar
@@ -131,6 +132,14 @@
         android:layout_below="@id/id_frame_bottom"
         android:gravity="center"
         android:layout_marginTop="25sp"/>
+
+    <FrameLayout
+        android:id="@+id/id_frame_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/id_text_update_time"
+
+        android:layout_marginTop="10sp"/>
 
 
 

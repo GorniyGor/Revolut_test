@@ -20,9 +20,9 @@ public class CurrencyList {
     public static final String TAG = "myLogs" ;
 
     //--Выставляется в DataLoader.class
-    public static HashMap<String, String> OPT_FX_URL = new HashMap<>();
+    public static HashMap<String, String> FX_URL = new HashMap<>();
     //--Выставляется в DataLoader.class
-    public static String[] FX_URL;
+    public static String[] OPT_FX_URL;
 
     //--Выставляется в MainActivity.class
     public static final HashMap<String, RecyclerView> RV_NAMES = new HashMap<>();

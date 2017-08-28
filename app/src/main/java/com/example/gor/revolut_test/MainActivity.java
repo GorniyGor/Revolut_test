@@ -17,12 +17,12 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SnapHelper;
 import android.widget.TextView;
 
+import com.example.gor.revolut_test.Currency_selection.ModelListCalling;
+import com.example.gor.revolut_test.Currency_selection.SelectionFragment;
 import com.example.gor.revolut_test.Internet.LoadService;
 
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -85,11 +85,11 @@ public class MainActivity extends AppCompatActivity {
         private CurrencyList mCurList = CurrencyList.getInstance();
         private AlarmManager mAlarmManager;
 
-        private GregorianCalendar gCalendar = new GregorianCalendar();
+        /*private GregorianCalendar gCalendar = new GregorianCalendar();*/
 
 
         @Override
-        public void onReceive(Context context, Intent intent) {
+        public void onReceive(final Context context, Intent intent) {
 
                 registerReceiver(new DataUpdateBroadcastReceiver(), new IntentFilter(UPDATE_ACTION));
 
@@ -111,9 +111,9 @@ public class MainActivity extends AppCompatActivity {
                                 putExtra("adapter", "both"));
 
                         // Установка времени последнего обновления валют
-                        textViewDate.setText("Updated " + gCalendar.get(Calendar.HOUR_OF_DAY) +
-                                ":" + new SimpleDateFormat("mm").format(new Date()) +
-                                new SimpleDateFormat(", dd-MM-yyyy").
+                        textViewDate.setText("Updated " +
+                                new SimpleDateFormat("HH:mm, ").format(new Date()) +
+                                new SimpleDateFormat("dd-MM-yyyy").
                                         format(mCurList.getLastUpdateDate()));
                     }
                 };
@@ -196,6 +196,23 @@ public class MainActivity extends AppCompatActivity {
                             mCurList.getCurrencyFrom(idRecyclerBottom), cash);
                     sendBroadcast(new Intent().setAction(UPDATE_ACTION).
                             putExtra("adapter", "BOTTOM"));
+                }
+            });
+
+            //--Для работы со списком валют
+            final ModelListCalling model = new ModelListCalling();
+            final SelectionFragment fragment = new SelectionFragment();
+            mRecyclerAdapterTop.setCallbackCurrencyClickListener(
+                    new RecyclerAdapter.CallbackCurrencyClickListener() {
+                @Override
+                public void onClick() {
+                    if(model.isSelected()){
+                        getSupportFragmentManager().beginTransaction()
+                                .remove(fragment).commit();
+                    }
+                    else getSupportFragmentManager().beginTransaction()
+                                .add(R.id.id_frame_layout, fragment).commit();
+                    model.setSelected(!model.isSelected());
                 }
             });
 
