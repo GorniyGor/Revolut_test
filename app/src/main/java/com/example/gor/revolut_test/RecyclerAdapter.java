@@ -14,7 +14,7 @@ import java.lang.ref.WeakReference;
 class RecyclerAdapter extends RecyclerView.Adapter<SimpleViewHolder>{
 
     private NotifyCashChanged mNotifyCashChanged;
-    private CallbackCurrencyClickListener mCallbackCurrencyClickListener;
+    /*private CallbackCurrencyClickListener mCallbackCurrencyClickListener;*/
 
     private final WeakReference<LayoutInflater> localInflater;
     private CurrencyList mCurList;
@@ -37,12 +37,12 @@ class RecyclerAdapter extends RecyclerView.Adapter<SimpleViewHolder>{
         if(inflater != null){
             SimpleViewHolder holder =
                     new SimpleViewHolder(inflater.inflate(R.layout.recycler_view, parent, false));
-            holder.setCurrencyClickListener(new SimpleViewHolder.CurrencyClickListener() {
+            /*holder.setCurrencyClickListener(new SimpleViewHolder.CurrencyClickListener() {
                 @Override
                 public void onClick() {
                     mCallbackCurrencyClickListener.onClick();
                 }
-            });
+            });*/
             return holder;
         }
         else {
@@ -120,7 +120,7 @@ class RecyclerAdapter extends RecyclerView.Adapter<SimpleViewHolder>{
         mNotifyCashChanged = notifyCashChanged;
     }
 
-    //--Для открытие окна со списком валют---
+    /*//--Для открытие окна со списком валют---
 
     public interface CallbackCurrencyClickListener {
         void onClick();
@@ -128,6 +128,6 @@ class RecyclerAdapter extends RecyclerView.Adapter<SimpleViewHolder>{
 
     public void setCallbackCurrencyClickListener(CallbackCurrencyClickListener callbackClickListener){
         mCallbackCurrencyClickListener = callbackClickListener;
-    }
+    }*/
 
 }

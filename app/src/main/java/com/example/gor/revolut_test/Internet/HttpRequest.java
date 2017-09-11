@@ -11,10 +11,11 @@ import java.net.URL;
  * Created by Gor on 25.07.2017.
  */
 
-class HttpRequest {
+public class HttpRequest {
 
     public static final int REQUEST_OK = 0;
     public static final int REQUEST_ERROR = 2;
+    public static boolean REQUEST_SUCCESS = false;
 
     private final String mURL;
     private String mContent;

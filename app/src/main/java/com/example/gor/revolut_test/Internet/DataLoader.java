@@ -45,10 +45,15 @@ public class DataLoader {
                     int status = request.makeRequest();
 
                     if (status == HttpRequest.REQUEST_OK) {
+                        HttpRequest.REQUEST_SUCCESS = true;
                         String jsonContent = request.getContent();
                         loadedListener.onDataLoaded(entry, jsonContent);
                     }
-                    else Log.d(CurrencyList.TAG,"DataLoader: HttpRequest notOk " );
+                    else {
+                        HttpRequest.REQUEST_SUCCESS = false;
+                        Log.d(CurrencyList.TAG,"DataLoader: HttpRequest notOk " );
+
+                    }
                 }
             });
         }

@@ -126,7 +126,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/id_text_update_time"
-        android:text="Updated 00:00, 01-01-1996"
+        android:text="@string/text_last_update"
         android:textColor="@color/colorPrimaryLight"
 
         android:layout_below="@id/id_frame_bottom"

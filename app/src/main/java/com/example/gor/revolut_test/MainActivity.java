@@ -8,19 +8,27 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PagerSnapHelper;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SnapHelper;
+import android.util.Log;
 import android.widget.TextView;
 
-import com.example.gor.revolut_test.Currency_selection.ModelListCalling;
-import com.example.gor.revolut_test.Currency_selection.SelectionFragment;
+import com.example.gor.revolut_test.Internet.HttpRequest;
 import com.example.gor.revolut_test.Internet.LoadService;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -84,6 +92,9 @@ public class MainActivity extends AppCompatActivity {
         private RecyclerAdapter mRecyclerAdapterBottom;
         private CurrencyList mCurList = CurrencyList.getInstance();
         private AlarmManager mAlarmManager;
+        OnGetConnect mOnGetConnect = new OnGetConnect();
+
+        AlertDialog dialogConnection;
 
         /*private GregorianCalendar gCalendar = new GregorianCalendar();*/
 
@@ -92,6 +103,16 @@ public class MainActivity extends AppCompatActivity {
         public void onReceive(final Context context, Intent intent) {
 
                 registerReceiver(new DataUpdateBroadcastReceiver(), new IntentFilter(UPDATE_ACTION));
+
+            AlertDialog.Builder dialogBuilder;
+            dialogBuilder = new AlertDialog.Builder(context);
+            dialogBuilder.setTitle("Problem");/*
+            dialogBuilder.setContentView(R.layout.dialog_layout);
+            TextView dialogText = (TextView) dialogBuilder.findViewById(R.id.id_dialog_text);*/
+            dialogBuilder.setMessage("NO INTERNET CONNECTION");
+            dialogConnection = dialogBuilder.create();
+            dialogConnection.setCancelable(false);
+
 
 
 
@@ -111,10 +132,18 @@ public class MainActivity extends AppCompatActivity {
                                 putExtra("adapter", "both"));
 
                         // Установка времени последнего обновления валют
-                        textViewDate.setText("Updated " +
-                                new SimpleDateFormat("HH:mm, ").format(new Date()) +
-                                new SimpleDateFormat("dd-MM-yyyy").
-                                        format(mCurList.getLastUpdateDate()));
+                        if(HttpRequest.REQUEST_SUCCESS ){
+                            textViewDate.setText("Updated " +
+                                    new SimpleDateFormat("HH:mm, ").format(new Date()) +
+                                    new SimpleDateFormat("dd-MM-yyyy").
+                                            format(mCurList.getLastUpdateDate()));
+                        }
+                        else {
+                            mRecyclerViewTop.setClickable(false);
+                            mRecyclerViewBottom.setClickable(false);
+                            textViewDate.setText("no internet connection");
+                        }
+
                     }
                 };
                 service.setNotifyListener(mNotifyListener);
@@ -199,7 +228,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
-            //--Для работы со списком валют
+          /*  //--Для работы со списком валют
             final ModelListCalling model = new ModelListCalling();
             final SelectionFragment fragment = new SelectionFragment();
             mRecyclerAdapterTop.setCallbackCurrencyClickListener(
@@ -214,7 +243,7 @@ public class MainActivity extends AppCompatActivity {
                                 .add(R.id.id_frame_layout, fragment).commit();
                     model.setSelected(!model.isSelected());
                 }
-            });
+            });*/
 
                 //---Second recycler--------------------------------------
 
@@ -274,17 +303,95 @@ public class MainActivity extends AppCompatActivity {
 
             //--------------------------------------------------------------------------------------
 
+            Log.d(CurrencyList.TAG,"MainActivity.onReceive: before Async" );
             //------Периодизация подкачки данных с сайта------
+            //-- с проверкой на состояние сети --
+            AsyncTask<Void, Void, Boolean> checkInternet = new AsyncTask<Void, Void, Boolean>() {
+
+                @Override
+                protected Boolean doInBackground(Void... params) {
+
+
+
+                    Log.d(CurrencyList.TAG,"MainActivity.AsyncTask: doInBackground" );
+                    ConnectivityManager cm = (ConnectivityManager)
+                            context.getSystemService(Context.CONNECTIVITY_SERVICE);
+                    NetworkInfo ni = cm.getActiveNetworkInfo();
+
+                    if(ni != null && ni.isConnected()) {
+                        try {
+
+                            URL url = new URL("http://fixer.io/");
+                            HttpURLConnection urlc = (HttpURLConnection) url.openConnection();
+
+                            urlc.setRequestProperty("User-Agent", "test");
+                            urlc.setRequestProperty("Connection", "close");
+                            urlc.setConnectTimeout(1000);
+                            urlc.connect();
+                            if (urlc.getResponseCode() == HttpURLConnection.HTTP_OK) return true;
+                        } catch (MalformedURLException e) {
+                            e.printStackTrace();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    return false;
+                }
+
+
+                @Override
+                protected void onPostExecute(Boolean result) {
+                    super.onPostExecute(result);
+
+                    Log.d(CurrencyList.TAG,"MainActivity.AsyncTask: onPostExecute" );
+                    if(result) {
+                        startDownload(context);
+                    }
+                    else {
+                        dialogConnection.show();
+
+                        // Подписаться на интент получения соединение с интернетом (OneTab)
+                        registerReceiver(mOnGetConnect,
+                                new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+
+                    }
+
+                }
+            };
+            checkInternet.execute();
+
+            //--------------------------------------------------------------------------------------
+
+        }
+
+        private void startDownload(Context context){
+
+            //Почему-то срабатывает при неработающем интернете
+            // (т.е. получает какой-то интент: CONNECTIVITY_CHANGE)
+            dialogConnection.dismiss();
+
             service.loadData();
             mAlarmManager = (AlarmManager) context.getSystemService(ALARM_SERVICE);
 
             Intent alarmIntent = new Intent(context, LoadBroadcastReceiver.class);
-            PendingIntent alarmPending = PendingIntent.getBroadcast(context, 0, alarmIntent, 0);
+            PendingIntent alarmPending = PendingIntent.getBroadcast(context, 0,
+                    alarmIntent, 0);
             //--maybeProblem--Система сдигает время до 60000 ms
-            mAlarmManager.setRepeating(AlarmManager.RTC, System.currentTimeMillis(), 30000, alarmPending);
+            mAlarmManager.setRepeating(AlarmManager.RTC, System.currentTimeMillis(),
+                    30000, alarmPending);
 
-            //--------------------------------------------------------------------------------------
+            //------------
+            //---А что, если не регистрировали его?
+            /*unregisterReceiver(mOnGetConnect);*/
+        }
 
+        private class OnGetConnect extends BroadcastReceiver{
+
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                startDownload(context);
+                unregisterReceiver(mOnGetConnect);
+            }
         }
 
         //--Для обновления курсов на экране при смене валют.
@@ -317,11 +424,16 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
         AlarmManager alarmManagerCanceled = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
         alarmManagerCanceled.cancel(PendingIntent.getBroadcast(this, 0,
                 new Intent(this, LoadBroadcastReceiver.class), 0));
         unbindService(serviceConnection);
         unregisterReceiver(broadcastReceiver);
     }
-
 }

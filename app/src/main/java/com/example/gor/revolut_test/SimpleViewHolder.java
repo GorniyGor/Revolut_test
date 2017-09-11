@@ -14,7 +14,7 @@ import android.widget.TextView;
 class SimpleViewHolder extends RecyclerView.ViewHolder {
 
     private CashChangedNotify mCashChangedNotify;
-    private CurrencyClickListener mCurrencyClickListener;
+    /*private CurrencyClickListener mCurrencyClickListener;*/
 
     private TextView currencyName;
     private TextView currencyRate;
@@ -54,12 +54,12 @@ class SimpleViewHolder extends RecyclerView.ViewHolder {
             }
         });
 
-        currencyName.setOnClickListener(new View.OnClickListener() {
+        /*currencyName.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mCurrencyClickListener.onClick();
             }
-        });
+        });*/
     }
 
     //--Main work method-------
@@ -85,7 +85,7 @@ class SimpleViewHolder extends RecyclerView.ViewHolder {
         mCashChangedNotify = cashChangedNotify;
     }
 
-    //--Для открытие окна со списком валют---
+    /*//--Для открытие окна со списком валют---
 
     public interface CurrencyClickListener {
         void onClick();
@@ -93,5 +93,5 @@ class SimpleViewHolder extends RecyclerView.ViewHolder {
 
     public void setCurrencyClickListener(CurrencyClickListener clickListener){
         mCurrencyClickListener = clickListener;
-    }
+    }*/
 }
